@@ -51,9 +51,5 @@ export class ValidImageReferenceValidator implements AsyncValidator, Validator {
   }
 
   ngOnChanges(): void {
-    // console.log('ngOnChanges');
-    // if (namespace && !namespace.firstChange) {
-    //   this.injector.get(NgModel).control.updateValueAndValidity();
-    // }
   }
 }

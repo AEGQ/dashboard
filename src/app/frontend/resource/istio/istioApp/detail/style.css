@@ -1,0 +1,31 @@
+.flow-control {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    position: relative;
+    height: 250px;
+}
+
+.flow-control>div{
+    width: 10%;
+    height: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.flow-control>div:nth-child(n+4){
+    width: 25%;
+}
+
+.flow-control>svg{
+    width: 10%;
+    height: 100%;
+}
+.match-rule {
+    border: 1px solid oldlace;
+}
+.destination-wraper {
+    border: 1px solid oldlace;
+}

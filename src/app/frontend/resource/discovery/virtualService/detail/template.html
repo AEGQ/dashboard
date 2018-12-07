@@ -1,0 +1,202 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<kd-object-meta [initialized]="isInitialized"
+                [objectMeta]="virtualService?.objectMeta"></kd-object-meta>
+
+<kd-card [initialized]="isInitialized">
+  <div title>HTTP</div>
+
+  <div content
+       *ngIf="isInitialized"
+       fxLayout="row wrap">
+    <kd-card role="listitem"
+             *ngFor="let http of virtualService?.http">
+      <div title>Route{{i}}</div>
+      <mat-list content
+                role="list">
+        <mat-list-item role="listitem"
+                       *ngFor="let route of http.route">
+          <kd-property>
+            <div key>weight</div>
+            <div value> {{route.weight}} </div>
+          </kd-property>
+          <kd-property>
+            <div key>destination.host</div>
+            <div value> {{route.destination.host}} </div>
+          </kd-property>
+          <kd-property>
+            <div key>destination.subset</div>
+            <div value> {{route.destination.subset}} </div>
+          </kd-property>
+        </mat-list-item>
+      </mat-list>
+    </kd-card>
+  </div>
+</kd-card>
+
+<kd-card>
+  <div title>Destination Rule List</div>
+  <div content>
+    <mat-list>
+      <mat-list-item style="height: auto;"
+                     *ngFor="let destination of virtualService?.destinationRuleList?.destinationRules">
+        <kd-object-meta matLine
+                        [initialized]="isInitialized"
+                        [objectMeta]="destination.objectMeta"></kd-object-meta>
+        <kd-card matLine>
+          <div title>Subsets</div>
+          <div content
+               *ngFor="let subset of destination.subsets"
+               style="display:flex;flex: wrap">
+            <kd-property>
+              <div key>name</div>
+              <div value> {{subset.name}} </div>
+            </kd-property>
+            <kd-property>
+              <div key>versions</div>
+              <div value> {{subset.labels?.version}} </div>
+            </kd-property>
+          </div>
+        </kd-card>
+        <mat-divider></mat-divider>
+      </mat-list-item>
+    </mat-list>
+  </div>
+</kd-card>
+
+<kd-card role="table">
+  <div title
+       fxLayout="row">Services</div>
+  <!-- <div description><span class="kd-muted-light">Items:&nbsp;</span>{{totalItems}}</div> -->
+
+  <div content>
+    <!-- <div kdLoadingSpinner
+         [isLoading]="isLoading"></div> -->
+
+    <mat-table [dataSource]="getData()">
+      <!-- <ng-container matColumnDef="statusicon">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let service">
+          <mat-icon [ngClass]="getStatus(service).iconClass">
+            {{getStatus(service).iconName}}
+          </mat-icon>
+        </mat-cell>
+      </ng-container> -->
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+        <mat-cell *matCellDef="let service">
+          <a [href]="getDetailsHref(service.objectMeta.name, service.objectMeta.namespace)">
+            {{service.objectMeta.name}}
+          </a>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container *ngIf="shouldShowColumn('namespace')"
+                    matColumnDef="namespace">
+        <mat-header-cell *matHeaderCellDef>Namespace</mat-header-cell>
+        <mat-cell *matCellDef="let service">{{service.objectMeta.namespace}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="labels">
+        <mat-header-cell *matHeaderCellDef>Labels</mat-header-cell>
+        <mat-cell *matCellDef="let service">
+          <kd-chips [map]="service.objectMeta.labels"></kd-chips>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="clusterip">
+        <mat-header-cell *matHeaderCellDef>Cluster IP</mat-header-cell>
+        <mat-cell *matCellDef="let service">{{service.clusterIP}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="internalendp">
+        <mat-header-cell *matHeaderCellDef>Internal Endpoints</mat-header-cell>
+        <mat-cell *matCellDef="let service">
+          <kd-internal-endpoint [endpoints]="[service.internalEndpoint]"></kd-internal-endpoint>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="externalendp">
+        <mat-header-cell *matHeaderCellDef>External Endpoints</mat-header-cell>
+        <mat-cell *matCellDef="let service">
+          <kd-external-endpoint [endpoints]="service.externalEndpoints"></kd-external-endpoint>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="age">
+        <mat-header-cell *matHeaderCellDef>Age</mat-header-cell>
+        <mat-cell *matCellDef="let service">
+          {{service.objectMeta.creationTimestamp | kdRelativeTime}}
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+
+    <!-- <mat-paginator [length]="totalItems"
+                   [pageSize]="itemsPerPage"
+                   [hidePageSize]="true"
+                   [showFirstLastButtons]="true"></mat-paginator> -->
+  </div>
+
+</kd-card>
+
+<!-- <kd-card>
+    <div title>Service List</div>
+    <div content>
+      <mat-list>
+        <mat-list-item style="height: auto;" *ngFor="let service of virtualService?.serviceList?.services;let i = index">
+          <kd-card matLine>
+            <div title>Service {{i}}</div>
+            <div fxLayout="row wrap" content>
+              <kd-property content>
+                <div key>clusterIP</div><div value>{{service.clusterIP}}</div>
+              </kd-property>
+              <kd-property content>
+                <div key>type</div><div value>{{service.type}}</div>
+              </kd-property>
+            </div>
+          </kd-card>
+          <kd-object-meta matLine [initialized]="isInitialized" [objectMeta]="service.objectMeta"></kd-object-meta>
+          <kd-card matLine>
+            <div title>internal Endpoint</div>
+            <div content fxLayout="row wrap">
+              <kd-property >
+                <div key>name</div>
+                <div value> {{service.internalEndpoint.host}} </div>
+              </kd-property>
+              <kd-property >
+                <div key>versions(port, protocol, nodePort)</div>
+                <div value *ngFor="let port of service.internalEndpoint.ports">
+                  {{port.port}},{{port.protocol}},{{port.nodePort}}
+                </div>
+              </kd-property>
+            </div>
+          </kd-card>
+          <kd-card matLine>
+              <div title>external Endpoint</div>
+              <div content>
+                {{service.externalEndpoints}}
+              </div>
+            </kd-card>
+          <mat-divider></mat-divider>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </kd-card> -->

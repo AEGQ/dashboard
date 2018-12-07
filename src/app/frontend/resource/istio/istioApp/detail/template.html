@@ -1,0 +1,113 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<kd-object-meta [initialized]="isInitialized"
+                [objectMeta]="istioApp?.objectMeta"></kd-object-meta>
+
+<kd-card>
+  <div title>Flow Control</div>
+  <div content>
+    <div class="flow-control">
+      <div class="app-name">
+        <span #appName>{{istioApp?.objectMeta?.name}}</span>
+      </div>
+      <svg #link1>
+        <defs>
+          <marker id="arrow"
+                  markerWidth="9"
+                  markerHeight="6"
+                  refX="0"
+                  refY="3"
+                  orient="auto"
+                  markerUnits="strokeWidth"
+                  viewBox="0 0 15 15">
+            <path d="M0,0 L0,6 L9,3 z"
+                  fill="#2b62e2" />
+          </marker>
+        </defs>
+      </svg>
+      <div>
+        <span #protocolName>http</span>
+        <!-- TODO: TCP/UDP/TLS -->
+      </div>
+      <svg #link2> </svg>
+      <div *ngIf="istioApp.virtualServices; else defaultService">
+        <div *ngFor="let http of istioApp.virtualServices[0].spec.http;let i = index;">
+
+          <div *ngIf="http.match"
+               class="match-rule"
+               #matchRule>
+            <span *ngFor="let match of http.match">
+              {{JSON.stringify(match.headers)}}<br>
+              {{JSON.stringify(match.method)}}
+            </span>
+          </div>
+
+          <div *ngIf="!http.match"
+               class="match-rule"
+               #matchRule>
+            <span>Default</span>
+          </div>
+
+        </div>
+      </div>
+      <ng-template #defaultService>
+        <div>
+          <div class="match-rule"
+               #matchRule>Default Service</div>
+        </div>
+      </ng-template>
+
+      <svg #link3> </svg>
+
+      <div>
+        <div *ngFor="let destination of istioApp.destinations"
+             class="destination-wraper"
+             [id]="destination.version">
+          <kd-property class="kd-inline-property">
+            <div key>version</div>
+            <div value>{{destination.version}}</div>
+          </kd-property>
+          <!-- <kd-property class="kd-inline-property">
+            <div key>selector</div>
+            <div value>
+              <kd-chips [map]="destination.selector"
+                        minChipsVisible="4"></kd-chips>
+            </div>
+          </kd-property> -->
+
+          <kd-property class="kd-inline-property">
+            <div key></div>
+            <div value>
+              <mat-menu #canaryMenu="matMenu">
+                <button mat-menu-item
+                        (click)="onTakeOver(destination.version)">Take Over</button>
+                <button mat-menu-item
+                        (click)="onOffline(destination.version)">Offline</button>
+              </mat-menu>
+
+              <button mat-icon-button
+                      [matMenuTriggerFor]="canaryMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+          </kd-property>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</kd-card>

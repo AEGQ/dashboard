@@ -1,0 +1,73 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<h2 mat-dialog-title>Canary Deployment</h2>
+<mat-dialog-content class="kd-dialog-text">
+  <form class="deployment-form"
+        *ngIf="development">
+
+    <mat-form-field class="deployment-full-width">
+      <input matInput
+             placeholder="Version"
+             [(ngModel)]="development.version"
+             name="version"
+             style="width:100%;">
+    </mat-form-field>
+
+    <mat-form-field class="deployment-full-width">
+      <input matInput
+             placeholder="Replicas"
+             type="number"
+             [(ngModel)]="development.replicas"
+             name="replicas"
+             style="width:100%;">
+    </mat-form-field>
+
+    <mat-form-field class="deployment-full-width">
+      <textarea matInput
+                placeholder="Description"
+                [(ngModel)]="development.description"
+                name="description"
+                style="width:100%;"></textarea>
+    </mat-form-field>
+  </form>
+
+  <mat-button-toggle-group #group="matButtonToggleGroup">
+    <mat-button-toggle [value]="modes.YAML">YAML</mat-button-toggle>
+    <mat-button-toggle [value]="modes.JSON"
+                       [checked]="true">JSON</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <kd-text-input [(text)]="development.podTemplate"
+                 [prettify]="false"
+                 [mode]="getSelectedMode()"></kd-text-input>
+  <div class="kd-equivalent-block kd-muted kd-bg-card-dark"
+       fxLayoutAlign=" center">
+    <mat-icon>info</mat-icon>
+    <div>
+      <span>This action is equivalent to:</span>
+      <code>kubectl apply -f &lt;spec.json&gt;</code>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button
+          color="primary"
+          [mat-dialog-close]="getJSON()">Start Canary</button>
+  <button mat-button
+          color="primary"
+          [mat-dialog-close]="false">Cancel</button>
+</mat-dialog-actions>

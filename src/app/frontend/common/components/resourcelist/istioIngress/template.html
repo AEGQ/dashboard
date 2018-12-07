@@ -1,0 +1,132 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+
+<kd-card role="table">
+  <div title
+       fxLayout="row">Istio Ingresses</div>
+  <div description><span class="kd-muted-light">Items:&nbsp;</span>{{totalItems}}</div>
+  <div actions>
+    <kd-card-list-filter></kd-card-list-filter>
+  </div>
+
+  <div content
+       [hidden]="showZeroState()">
+    <div kdLoadingSpinner
+         [isLoading]="isLoading"></div>
+
+    <mat-table [dataSource]="getData()"
+               matSort
+               matSortActive="age"
+               matSortDisableClear
+               matSortDirection="asc">
+      <ng-container matColumnDef="statusicon">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress; let index=index">
+          <mat-icon [ngClass]="getStatus(istioIngress).iconClass">
+            <ng-container *ngIf="showHoverIcon(index, istioIngress); else showStatus">
+              remove_red_eye
+            </ng-container>
+
+            <ng-template #showStatus>
+              {{getStatus(istioIngress).iconName}}
+            </ng-template>
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header
+                         disableClear="true">Name</mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">
+          <a (click)="$event.stopPropagation()"
+             [href]="getDetailsHref(istioIngress.objectMeta.name, istioIngress.objectMeta.namespace)">
+            {{istioIngress.objectMeta.name}}
+          </a>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container *ngIf="shouldShowColumn('namespace')"
+                    matColumnDef="namespace">
+        <mat-header-cell *matHeaderCellDef>Namespace</mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">{{istioIngress.objectMeta.namespace}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="labels">
+        <mat-header-cell *matHeaderCellDef>Labels</mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">
+          <kd-chips [map]="istioIngress?.objectMeta.labels"
+                    minChipsVisible="4"></kd-chips>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="hosts">
+        <mat-header-cell *matHeaderCellDef>Hosts</mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">
+          <kd-external-endpoint [endpoints]="istioIngress.hosts"></kd-external-endpoint>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="externalep">
+        <mat-header-cell *matHeaderCellDef>External Endpoints</mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">
+          <kd-external-endpoint [endpoints]="istioIngress.externalEndpoints"></kd-external-endpoint>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="age">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header
+                         disableClear="true">Age</mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">{{istioIngress.objectMeta.creationTimestamp | kdRelativeTime}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let istioIngress">
+          <mat-menu #canaryMenu="matMenu">
+            <button mat-menu-item
+                    (click)="onDelete(istioIngress)">Delete</button>
+          </mat-menu>
+
+          <button mat-icon-button
+                  [matMenuTriggerFor]="canaryMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="getColumns()"></mat-header-row>
+      <mat-row #matrow
+               (mouseover)="onRowOver(index)"
+               (mouseleave)="onRowLeave()"
+               (click)="expand(index, row)"
+               [ngClass]="{'kd-no-bottom-border': isRowExpanded(index), 'kd-clickable': hasErrors(row)}"
+               *matRowDef="let row; columns: getColumns(); let index=index"></mat-row>
+    </mat-table>
+
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="itemsPerPage"
+                   [hidePageSize]="true"
+                   [showFirstLastButtons]="true"></mat-paginator>
+  </div>
+
+  <div content
+       [hidden]="!showZeroState()">
+    <kd-list-zero-state></kd-list-zero-state>
+  </div>
+</kd-card>

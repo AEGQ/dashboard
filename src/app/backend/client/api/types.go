@@ -15,8 +15,9 @@
 package api
 
 import (
-	restful "github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful"
 	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
+	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
 	"k8s.io/api/authorization/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -37,6 +38,7 @@ type ClientManager interface {
 	HasAccess(authInfo api.AuthInfo) error
 	VerberClient(req *restful.Request) (ResourceVerber, error)
 	SetTokenManager(manager authApi.TokenManager)
+	IstioClient(req *restful.Request) (istio.Interface, error)
 }
 
 // ResourceVerber is responsible for performing generic CRUD operations on all supported resources.

@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	restful "github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful"
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/auth"
 	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
@@ -28,6 +28,7 @@ import (
 	kdErrors "github.com/kubernetes/dashboard/src/app/backend/errors"
 	"github.com/kubernetes/dashboard/src/app/backend/integration"
 	metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
+	"github.com/kubernetes/dashboard/src/app/backend/istio"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/clusterrole"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/configmap"
@@ -37,8 +38,10 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/daemonset"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/deployment"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/destinationrule"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/endpoint"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/event"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/gateway"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/horizontalpodautoscaler"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/ingress"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/job"
@@ -52,8 +55,10 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/replicationcontroller"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/secret"
 	resourceService "github.com/kubernetes/dashboard/src/app/backend/resource/service"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/serviceentry"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/statefulset"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/storageclass"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
 	"github.com/kubernetes/dashboard/src/app/backend/scaling"
 	"github.com/kubernetes/dashboard/src/app/backend/settings"
 	"github.com/kubernetes/dashboard/src/app/backend/systembanner"
@@ -114,6 +119,9 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	systemBannerHandler := systembanner.NewSystemBannerHandler(sbManager)
 	systemBannerHandler.Install(apiV1Ws)
+
+	istioHandler := istio.NewIstioHandler(cManager)
+	istioHandler.Install(apiV1Ws)
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("csrftoken/{action}").
@@ -254,6 +262,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/deployment/{namespace}/{deployment}/oldreplicaset").
 			To(apiHandler.handleGetDeploymentOldReplicaSets).
 			Writes(replicaset.ReplicaSetList{}))
+	apiV1Ws.Route(
+		apiV1Ws.PUT("/deployment/{namespace}/{deployment}/restart").
+			To(apiHandler.handleRedeployDeployment).
+			Writes(common.EventList{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/scale/{kind}/{namespace}/{name}/").
@@ -418,6 +430,58 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(pod.PodList{}))
 
 	apiV1Ws.Route(
+		apiV1Ws.GET("/virtualservice").
+			To(apiHandler.handleGetVirtualServiceList).
+			Writes(virtualservice.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/virtualservice/{namespace}").
+			To(apiHandler.handleGetVirtualServiceList).
+			Writes(virtualservice.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/virtualservice/{namespace}/{name}").
+			To(apiHandler.handleGetVirtualServiceDetail).
+			Writes(virtualservice.VirtualService{}))
+
+	apiV1Ws.Route(
+		apiV1Ws.GET("/destinationrule").
+			To(apiHandler.handleGetDestinationRuleList).
+			Writes(destinationrule.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/destinationrule/{namespace}").
+			To(apiHandler.handleGetDestinationRuleList).
+			Writes(destinationrule.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/destinationrule/{namespace}/{name}").
+			To(apiHandler.handleGetDestinationRuleDetail).
+			Writes(destinationrule.DestinationRuleDetail{}))
+
+	apiV1Ws.Route(
+		apiV1Ws.GET("/serviceentry").
+			To(apiHandler.handleGetServiceEntryList).
+			Writes(serviceentry.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/serviceentry/{namespace}").
+			To(apiHandler.handleGetServiceEntryList).
+			Writes(serviceentry.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/serviceentry/{namespace}/{name}").
+			To(apiHandler.handleGetServiceEntryDetail).
+			Writes(serviceentry.ServiceEntry{}))
+
+	apiV1Ws.Route(
+		apiV1Ws.GET("/gateway").
+			To(apiHandler.handleGetGatewayList).
+			Writes(gateway.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/gateway/{namespace}").
+			To(apiHandler.handleGetGatewayList).
+			Writes(gateway.List{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/gateway/{namespace}/{name}").
+			To(apiHandler.handleGetGatewayDetail).
+			Writes(gateway.Gateway{}))
+
+	apiV1Ws.Route(
 		apiV1Ws.GET("/ingress").
 			To(apiHandler.handleGetIngressList).
 			Writes(ingress.IngressList{}))
@@ -509,7 +573,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/persistentvolume/namespace/{namespace}/name/{persistentvolume}").
 			To(apiHandler.handleGetPersistentVolumeDetail).
 			Writes(persistentvolume.PersistentVolumeDetail{}))
-
 	apiV1Ws.Route(
 		apiV1Ws.GET("/persistentvolumeclaim/").
 			To(apiHandler.handleGetPersistentVolumeClaimList).
@@ -736,6 +799,199 @@ func (apiHandler *APIHandler) handleGetServiceDetail(request *restful.Request, r
 		kdErrors.HandleInternalError(response, err)
 		return
 	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetVirtualServiceList(request *restful.Request, response *restful.Response) {
+	client, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := parseNamespacePathParameter(request)
+	dataSelect := parseDataSelectPathParameter(request)
+	result, err := virtualservice.GetVirtualServiceList(client, istioClient, namespace, dataSelect)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetVirtualServiceDetail(request *restful.Request, response *restful.Response) {
+
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	name := request.PathParameter("name")
+	namespace := request.PathParameter("namespace")
+	result, err := virtualservice.GetVirtualService(k8sClient, istioClient, name, namespace)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetServiceEntryList(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := parseNamespacePathParameter(request)
+	dsQuery := parseDataSelectPathParameter(request)
+	result, err := serviceentry.GetServiceEntryList(k8sClient, istioClient, namespace, dsQuery)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetServiceEntryDetail(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	name := request.PathParameter("name")
+	namespace := request.PathParameter("namespace")
+	result, err := serviceentry.GetServiceEntry(k8sClient, istioClient, name, namespace)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetGatewayList(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := parseNamespacePathParameter(request)
+	dataSelect := parseDataSelectPathParameter(request)
+	result, err := gateway.GetGatewayList(k8sClient, istioClient, namespace, dataSelect)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetGatewayDetail(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	name := request.PathParameter("name")
+	namespace := request.PathParameter("namespace")
+	result, err := gateway.GetGateway(k8sClient, istioClient, name, namespace)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetDestinationRuleList(request *restful.Request, response *restful.Response) {
+	client, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := parseNamespacePathParameter(request)
+	dsQuery := parseDataSelectPathParameter(request)
+	result, err := destinationrule.GetDestinationRuleList(client, istioClient, namespace, dsQuery)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetDestinationRuleDetail(request *restful.Request, response *restful.Response) {
+	// TODO get destination rule
+	client, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	istioClient, err := apiHandler.cManager.IstioClient(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
+	name := request.PathParameter("name")
+	namespace := request.PathParameter("namespace")
+	result, err := destinationrule.GetDestinationRule(client, istioClient, name, namespace)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+		return
+	}
+
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
@@ -1254,6 +1510,22 @@ func (apiHandler *APIHandler) handleGetDeploymentOldReplicaSets(request *restful
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleRedeployDeployment(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		kdErrors.HandleInternalError(response, err)
+	}
+
+	namespace := request.PathParameter("namespace")
+	deploymentName := request.PathParameter("deployment")
+
+	if err := deployment.Redeploy(k8sClient, namespace, deploymentName); err != nil {
+		kdErrors.HandleInternalError(response, err)
+	}
+
+	response.WriteHeader(http.StatusOK)
 }
 
 func (apiHandler *APIHandler) handleGetPods(request *restful.Request, response *restful.Response) {

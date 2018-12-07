@@ -24,6 +24,7 @@ import (
 	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
 	"github.com/kubernetes/dashboard/src/app/backend/client"
 	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
+	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
 	"k8s.io/api/authorization/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/kubernetes"
@@ -42,6 +43,10 @@ type fakeClientManager struct {
 }
 
 func (self *fakeClientManager) Client(req *restful.Request) (kubernetes.Interface, error) {
+	return nil, nil
+}
+
+func (self *fakeClientManager) IstioClient(req *restful.Request) (istio.Interface, error) {
 	return nil, nil
 }
 
@@ -69,7 +74,7 @@ func (self *fakeClientManager) HasAccess(authInfo api.AuthInfo) error {
 
 func (self *fakeClientManager) VerberClient(req *restful.Request) (clientapi.ResourceVerber, error) {
 	return client.NewResourceVerber(nil, nil, nil, nil, nil,
-		nil, nil, nil), nil
+		nil, nil, nil, nil), nil
 }
 
 func (self *fakeClientManager) CanI(req *restful.Request, ssar *v1.SelfSubjectAccessReview) bool {

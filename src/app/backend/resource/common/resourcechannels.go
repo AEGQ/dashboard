@@ -16,6 +16,8 @@ package common
 
 import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
+	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
+	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
 	apps "k8s.io/api/apps/v1beta2"
 	autoscaling "k8s.io/api/autoscaling/v1"
 	batch "k8s.io/api/batch/v1"
@@ -117,6 +119,18 @@ type ResourceChannels struct {
 
 	// List and error channels to ClusterRoleBindings
 	ClusterRoleBindingList ClusterRoleBindingListChannel
+
+	// List and error channels to VirtualServices
+	VirtualServiceList VirtualServiceListChannel
+
+	// List and error channels to DestinationRules
+	DestinationRuleList DestinationRuleListChannel
+
+	// List and error channels to Gateways
+	GatewayList GatewayListChannel
+
+	// List and error channels to ServiceEntries
+	ServiceEntryList ServiceEntryListChannel
 }
 
 // ServiceListChannel is a list and error channels to Services.
@@ -129,13 +143,20 @@ type ServiceListChannel struct {
 // must be read numReads times.
 func GetServiceListChannel(client client.Interface, nsQuery *NamespaceQuery,
 	numReads int) ServiceListChannel {
+	return GetServiceListChannelWithOptions(client, nsQuery, api.ListEverything, numReads)
+}
+
+// GetServiceListChannel returns a pair of channels to a Service list and errors that both
+// must be read numReads times.
+func GetServiceListChannelWithOptions(client client.Interface, nsQuery *NamespaceQuery,
+	options metaV1.ListOptions, numReads int) ServiceListChannel {
 
 	channel := ServiceListChannel{
 		List:  make(chan *v1.ServiceList, numReads),
 		Error: make(chan error, numReads),
 	}
 	go func() {
-		list, err := client.CoreV1().Services(nsQuery.ToRequestParam()).List(api.ListEverything)
+		list, err := client.CoreV1().Services(nsQuery.ToRequestParam()).List(options)
 		var filteredItems []v1.Service
 		for _, item := range list.Items {
 			if nsQuery.Matches(item.ObjectMeta.Namespace) {
@@ -894,6 +915,8 @@ type StorageClassListChannel struct {
 	Error chan error
 }
 
+// Istio Custom Resource Definitions
+
 // GetStorageClassListChannel returns a pair of channels to a storage class list and
 // errors that both must be read numReads times.
 func GetStorageClassListChannel(client client.Interface, numReads int) StorageClassListChannel {
@@ -904,6 +927,138 @@ func GetStorageClassListChannel(client client.Interface, numReads int) StorageCl
 
 	go func() {
 		list, err := client.StorageV1().StorageClasses().List(api.ListEverything)
+		for i := 0; i < numReads; i++ {
+			channel.List <- list
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
+// VirtualServiceListChannel is a list and error channels to VirtualServices.
+type VirtualServiceListChannel struct {
+	List  chan *v1alpha3.VirtualServiceList
+	Error chan error
+}
+
+// GetVirtualServiceListChannel returns a pair of channels to a VirtualService list and errors that both
+// must be read numReads times.
+func GetVirtualServiceListChannel(client istio.Interface, nsQuery *NamespaceQuery,
+	numReads int) VirtualServiceListChannel {
+
+	channel := VirtualServiceListChannel{
+		List:  make(chan *v1alpha3.VirtualServiceList, numReads),
+		Error: make(chan error, numReads),
+	}
+	go func() {
+		list, err := client.NetworkingV1alpha3().VirtualServices(nsQuery.ToRequestParam()).List(api.ListEverything)
+		var filteredItems []v1alpha3.VirtualService
+		for _, item := range list.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		list.Items = filteredItems
+		for i := 0; i < numReads; i++ {
+			channel.List <- list
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
+// DestinationRuleListChannel is a list and error channels to DestinationRules.
+type DestinationRuleListChannel struct {
+	List  chan *v1alpha3.DestinationRuleList
+	Error chan error
+}
+
+// GetDestinationRuleListChannel returns a pair of channels to a DestinationRule list and errors that both
+// must be read numReads times.
+func GetDestinationRuleListChannel(client istio.Interface, nsQuery *NamespaceQuery,
+	numReads int) DestinationRuleListChannel {
+
+	channel := DestinationRuleListChannel{
+		List:  make(chan *v1alpha3.DestinationRuleList, numReads),
+		Error: make(chan error, numReads),
+	}
+	go func() {
+		list, err := client.NetworkingV1alpha3().DestinationRules(nsQuery.ToRequestParam()).List(api.ListEverything)
+		var filteredItems []v1alpha3.DestinationRule
+		for _, item := range list.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		list.Items = filteredItems
+		for i := 0; i < numReads; i++ {
+			channel.List <- list
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
+// GatewayListChannel is a list and error channels to Gateways.
+type GatewayListChannel struct {
+	List  chan *v1alpha3.GatewayList
+	Error chan error
+}
+
+// GetGatewayListChannel returns a pair of channels to a Gateway list and errors that both
+// must be read numReads times.
+func GetGatewayListChannel(client istio.Interface, nsQuery *NamespaceQuery,
+	numReads int) GatewayListChannel {
+
+	channel := GatewayListChannel{
+		List:  make(chan *v1alpha3.GatewayList, numReads),
+		Error: make(chan error, numReads),
+	}
+	go func() {
+		list, err := client.NetworkingV1alpha3().Gateways(nsQuery.ToRequestParam()).List(api.ListEverything)
+		var filteredItems []v1alpha3.Gateway
+		for _, item := range list.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		list.Items = filteredItems
+		for i := 0; i < numReads; i++ {
+			channel.List <- list
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
+// ServiceEntryListChannel is a list and error channels to ServiceEntrys.
+type ServiceEntryListChannel struct {
+	List  chan *v1alpha3.ServiceEntryList
+	Error chan error
+}
+
+// GetServiceEntryListChannel returns a pair of channels to a ServiceEntry list and errors that both
+// must be read numReads times.
+func GetServiceEntryListChannel(client istio.Interface, nsQuery *NamespaceQuery,
+	numReads int) ServiceEntryListChannel {
+
+	channel := ServiceEntryListChannel{
+		List:  make(chan *v1alpha3.ServiceEntryList, numReads),
+		Error: make(chan error, numReads),
+	}
+	go func() {
+		list, err := client.NetworkingV1alpha3().ServiceEntries(nsQuery.ToRequestParam()).List(api.ListEverything)
+		var filteredItems []v1alpha3.ServiceEntry
+		for _, item := range list.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		list.Items = filteredItems
 		for i := 0; i < numReads; i++ {
 			channel.List <- list
 			channel.Error <- err

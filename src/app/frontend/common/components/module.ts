@@ -17,12 +17,14 @@ import {NgModule} from '@angular/core';
 import {SharedModule} from '../../shared.module';
 
 import {ActionbarComponent} from './actionbar/component';
+import {ActionbarDetailCanaryComponent} from './actionbar/detailactions/canary/component';
 import {ActionbarDetailActionsComponent} from './actionbar/detailactions/component';
 import {ActionbarDetailDeleteComponent} from './actionbar/detailactions/delete/component';
 import {ActionbarDetailEditComponent} from './actionbar/detailactions/edit/component';
 import {ActionbarDetailExecComponent} from './actionbar/detailactions/exec/component';
 import {ActionbarDetailLogsComponent} from './actionbar/detailactions/logs/component';
 import {DefaultDetailsActionbar} from './actionbars/defaultdetail/component';
+import {IstioAppDetailsActionbar} from "./actionbars/istioappdetail/component";
 import {PodDetailsActionbar} from './actionbars/poddetail/component';
 import {ScaleableResourceDetailActionbar} from './actionbars/scaleableresourcedetail/component';
 import {AllocationChartComponent} from './allocationchart/component';
@@ -39,7 +41,9 @@ import {ExternalEndpointComponent} from './endpoint/external/component';
 import {InternalEndpointComponent} from './endpoint/internal/component';
 import {HiddenPropertyComponent} from './hiddenproperty/component';
 import {ResourceLimitListComponent} from './limits/component';
+import {CanaryButtonComponent} from "./list/column/canarybutton/component";
 import {ColumnComponent} from './list/column/component';
+import {IstioAppMenuComponent} from "./list/column/istioappmenu/component";
 import {LogsButtonComponent} from './list/column/logsbutton/component';
 import {MenuComponent} from './list/column/menu/component';
 import {CardListFilterComponent} from './list/filter/component';
@@ -59,8 +63,12 @@ import {ConfigMapListComponent} from './resourcelist/configmap/component';
 import {CronJobListComponent} from './resourcelist/cronjob/component';
 import {DaemonSetListComponent} from './resourcelist/daemonset/component';
 import {DeploymentListComponent} from './resourcelist/deployment/component';
+import {DestinationRuleListComponent} from './resourcelist/destinationRule/component';
 import {EventListComponent} from './resourcelist/event/component';
+import {GatewayListComponent} from './resourcelist/gateway/component';
 import {IngressListComponent} from './resourcelist/ingress/component';
+import {IstioAppListComponent} from './resourcelist/istioApp/component';
+import {IstioIngressListComponent} from "./resourcelist/istioIngress/component";
 import {JobListComponent} from './resourcelist/job/component';
 import {NamespaceListComponent} from './resourcelist/namespace/component';
 import {NodeListComponent} from './resourcelist/node/component';
@@ -73,6 +81,7 @@ import {SecretListComponent} from './resourcelist/secret/component';
 import {ServiceListComponent} from './resourcelist/service/component';
 import {StatefulSetListComponent} from './resourcelist/statefulset/component';
 import {StorageClassListComponent} from './resourcelist/storageclass/component';
+import {VirtualServiceListComponent} from './resourcelist/virtualservice/component';
 import {TextInputComponent} from './textinput/component';
 import {UploadFileComponent} from './uploadfile/component';
 import {ZeroStateComponent} from './zerostate/component';
@@ -121,6 +130,8 @@ import {ZeroStateComponent} from './zerostate/component';
     ColumnComponent,
     LogsButtonComponent,
     MenuComponent,
+    CanaryButtonComponent,
+    IstioAppMenuComponent,
     HiddenPropertyComponent,
     EventListComponent,
     ContainerCardComponent,
@@ -138,10 +149,17 @@ import {ZeroStateComponent} from './zerostate/component';
     ActionbarDetailEditComponent,
     ActionbarDetailLogsComponent,
     ActionbarDetailExecComponent,
+    ActionbarDetailCanaryComponent,
     UploadFileComponent,
     DefaultDetailsActionbar,
     PodDetailsActionbar,
     ScaleableResourceDetailActionbar,
+    IstioAppDetailsActionbar,
+    VirtualServiceListComponent,
+    DestinationRuleListComponent,
+    IstioAppListComponent,
+    IstioIngressListComponent,
+    GatewayListComponent
   ],
   exports: [
     AllocationChartComponent,
@@ -193,15 +211,23 @@ import {ZeroStateComponent} from './zerostate/component';
     ActionbarDetailEditComponent,
     ActionbarDetailLogsComponent,
     ActionbarDetailExecComponent,
+    ActionbarDetailCanaryComponent,
     UploadFileComponent,
     DefaultDetailsActionbar,
     PodDetailsActionbar,
     ScaleableResourceDetailActionbar,
+    VirtualServiceListComponent,
+    DestinationRuleListComponent,
+    IstioAppListComponent,
+    IstioIngressListComponent,
+    GatewayListComponent
   ],
   entryComponents: [
     ChipDialog,
     RowDetailComponent,
     LogsButtonComponent,
+    CanaryButtonComponent,
+    IstioAppMenuComponent,
     MenuComponent,
     NamespaceChangeDialog,
   ]

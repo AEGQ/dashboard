@@ -20,10 +20,11 @@ import (
 	"log"
 	"strings"
 
-	restful "github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful"
 	"github.com/kubernetes/dashboard/src/app/backend/args"
 	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
 	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
+	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
 	"k8s.io/api/authorization/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -190,10 +191,15 @@ func (self *clientManager) VerberClient(req *restful.Request) (clientapi.Resourc
 		return nil, err
 	}
 
+	istioClient, err := self.IstioClient(req)
+	if err != nil {
+		return nil, err
+	}
+
 	return NewResourceVerber(client.CoreV1().RESTClient(),
 		client.ExtensionsV1beta1().RESTClient(), client.AppsV1beta2().RESTClient(),
 		client.BatchV1().RESTClient(), client.BatchV1beta1().RESTClient(), client.AutoscalingV1().RESTClient(),
-		client.StorageV1().RESTClient(), client.RbacV1().RESTClient()), nil
+		client.StorageV1().RESTClient(), client.RbacV1().RESTClient(), istioClient.NetworkingV1alpha3().RESTClient()), nil
 }
 
 // SetTokenManager sets the token manager that will be used for token decryption.
@@ -354,6 +360,20 @@ func (self *clientManager) generateCSRFKey() {
 // Returns true if in-cluster config is used
 func (self *clientManager) isRunningInCluster() bool {
 	return self.inClusterConfig != nil
+}
+
+func (self *clientManager) IstioClient(req *restful.Request) (istio.Interface, error) {
+	cfg, err := self.Config(req)
+	if err != nil {
+		return nil, err
+	}
+	cfg.ContentType = "application/json"
+
+	client, err := istio.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 // NewClientManager creates client manager based on kubeConfigPath and apiserverHost parameters.

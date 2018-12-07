@@ -62,6 +62,24 @@ export interface CapacityItem {
   quantity: string;
 }
 
+export interface host {
+  hosts: string[];
+  port: port[];
+  tls: tls;
+}
+
+export interface port {
+  name: string;
+  number: number;
+  protocol: string;
+}
+
+export interface tls {
+  mode: string;
+  privateKey: string;
+  serverCertificate: string;
+}
+
 // List types
 export interface ClusterRoleList extends ResourceList {
   items: ClusterRole[];
@@ -154,6 +172,22 @@ export interface SecretList extends ResourceList {
 
 export interface ServiceList extends ResourceList {
   services: Service[];
+}
+
+export interface VirtualServiceList extends ResourceList {
+  virtualServices: VirtualService[];
+}
+
+interface GatewayList extends ResourceList {
+  gateways: Gateway[]
+}
+
+export interface IstioAppList extends ResourceList {
+  apps: IstioApp[];
+}
+
+export interface IstioIngressList extends ResourceList {
+  items: IstioIngress[];
 }
 
 export interface StatefulSetList extends ResourceList {
@@ -319,6 +353,53 @@ export interface Service extends Resource {
   selector: StringMap;
   type: string;
   clusterIP: string;
+}
+
+export interface DestinationRules extends Resource {
+  errors: K8sError[];
+  subsets: Object[];
+  host: host;
+  string: string;
+}
+
+export interface DestinationRuleList extends ResourceList {
+  destinationRules: DestinationRules[]
+}
+
+export interface VirtualService extends Resource {
+  errors: K8sError[];
+  hosts: string[];
+  http: Object[];
+  initContainerImages: string[];
+  serviceList: ServiceList;
+  destinationRuleList: DestinationRuleList;
+  spec: Spec;
+}
+
+export interface Gateway extends Resource {
+  errors: K8sError[];
+  servers: host[];
+  selector: object;
+}
+
+export interface IstioApp extends Resource {
+  errors: K8sError[];
+  destinations: Destination[];
+  destinationVersions: string[];
+  virtualServices: VirtualService[];
+}
+
+export interface Destination extends Resource {
+  errors: K8sError[];
+  version: string;
+  selector: object;
+  subset: string;
+}
+
+export interface IstioIngress extends Resource {
+  errors: K8sError[];
+  hosts: string[];
+  virtualServices: VirtualService[];
 }
 
 export interface StatefulSet extends Resource {
@@ -1080,4 +1161,75 @@ export interface SJSCloseEvent extends SockJSSimpleEvent {
 
 export interface SJSMessageEvent extends SockJSSimpleEvent {
   data: string;
+}
+
+interface Metadata extends ObjectMeta {
+  generation: string;
+  resourceVersion: string;
+  selfLink: string;
+  uid: string;
+}
+
+interface Status {
+  availableReplicas: number;
+  conditions: StringMap[];
+  observedGeneration: number;
+  readyReplicas: number;
+  replicas: number;
+  updatedReplicas: number;
+}
+
+interface RollingUpdate {
+  maxSurge: number;
+  maxUnavailable: number;
+}
+
+interface Strategy {
+  type: string;
+  rollingUpdate: RollingUpdate;
+}
+
+interface template {metadata: Metadata, spec: string}
+
+interface Spec {
+  progressDeadlineSeconds: number;
+  replicas: number;
+  revisionHistoryLimit: number;
+  selector: LabelSelector;
+  matchLabels: StringMap;
+  strategy: Strategy;
+  template: template;
+  http: Http[];
+}
+
+export interface Http {
+  match: Match[];
+  route: Route[];
+}
+
+export interface Route {
+  destination: Destination;
+  weight: number;
+}
+export interface Match {
+  headers: object;
+  method: object;
+}
+
+export interface CanaryDeployment {
+  metadata: Metadata;
+  spec: Spec;
+  status: Status;
+}
+
+export interface CanaryDeploymentInput {
+  version: string;
+  replicas: number;
+  podTemplate: string;
+  description: string;
+  podTemplateJSON: string;
+}
+
+export interface IstioItInput {
+  version: string;
 }

@@ -133,6 +133,15 @@ const (
 	ResourceKindStorageClass            = "storageclass"
 	ResourceKindClusterRole             = "clusterrole"
 	ResourceKindEndpoint                = "endpoint"
+
+	// Custom Resource Definition
+	ResourceKindVirtualService  = "virtualservice"
+	ResourceKindDestinationRule = "destinationrule"
+	ResourceKindServiceEntry    = "serviceentry"
+	ResourceKindGateway         = "gateway"
+
+	// Istio related
+	ResourceKindApp = "app"
 )
 
 // ClientType represents type of client that is used to perform generic operations on resources.
@@ -150,6 +159,7 @@ const (
 	ClientTypeAutoscalingClient = "autoscalingclient"
 	ClientTypeStorageClient     = "storageclient"
 	ClientTypeRbacClient        = "rbacclient"
+	ClientTypeIstioVerberClient = "istioverberclient"
 )
 
 // Mapping from resource kind to K8s apiserver API path. This is mostly pluralization, because
@@ -186,6 +196,10 @@ var KindToAPIMapping = map[string]struct {
 	ResourceKindStorageClass:            {"storageclasses", ClientTypeStorageClient, false},
 	ResourceKindEndpoint:                {"endpoints", ClientTypeDefault, true},
 	ResourceKindClusterRole:             {"clusterroles", ClientTypeRbacClient, false},
+	ResourceKindVirtualService:          {"virtualservices", ClientTypeIstioVerberClient, true},
+	ResourceKindDestinationRule:         {"destinationrules", ClientTypeIstioVerberClient, true},
+	ResourceKindGateway:                 {"gateways", ClientTypeIstioVerberClient, true},
+	ResourceKindServiceEntry:            {"serviceentries", ClientTypeIstioVerberClient, true},
 }
 
 // IsSelectorMatching returns true when an object with the given selector targets the same

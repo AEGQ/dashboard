@@ -321,7 +321,7 @@
 
 [[projects]]
   branch = "istio-1.0.0"
-  digest = "1:a90905ab37146680486cbdd9213783fcc1c86c9ad5bc14abab4e919896f1ed94"
+  digest = "1:08bad78753aa6ec7b57229440af8e7923bd9c9308186d2ed3d3cd174ec53e3a0"
   name = "github.com/wallstreetcn/istio-k8s"
   packages = [
     "apis/networking.istio.io",
@@ -331,7 +331,7 @@
     "client/clientset/versioned/typed/networking.istio.io/v1alpha3",
   ]
   pruneopts = ""
-  revision = "792be60858d1835333f2504cbb94a656cd7b432e"
+  revision = "bab38fc228963ccd7ace4d38300d5d3023b8f522"
 
 [[projects]]
   branch = "master"

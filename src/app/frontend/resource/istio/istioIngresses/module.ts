@@ -28,7 +28,8 @@ import {istioIngressState} from './state';
   imports: [
     SharedModule,
     ComponentsModule,
-    UIRouterModule.forChild({states: [istioIngressState, istioIngressListState, istioIngressDetailState]}),
+    UIRouterModule.forChild(
+        {states: [istioIngressState, istioIngressListState, istioIngressDetailState]}),
   ],
   declarations: [IstioIngressList, IstioIngressComponent],
 })

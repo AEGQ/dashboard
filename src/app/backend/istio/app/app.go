@@ -15,7 +15,6 @@
 package app
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -31,7 +30,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
 	istioApi "github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -86,57 +85,14 @@ func getApps(services *service.ServiceList, dRules *destinationrule.List, vServi
 	}
 
 	if dRules != nil {
-		for _, dRule := range dRules.DestinationRules {
-			svcAddr := dRule.Host + "." + dRule.ObjectMeta.Namespace
-
-			for _, app := range apps {
-				appAddr := app.ObjectMeta.Name + "." + app.ObjectMeta.Namespace
-				if appAddr == svcAddr {
-					app.Destinations = []api.Destination{}
-					for _, sub := range dRule.Subsets {
-						app.Destinations = append(app.Destinations, api.Destination{
-							Version:  sub.Name,
-							Selector: sub.Labels,
-						})
-					}
-					break
-				}
-			}
-
-			// TODO fetch deployments behind the proxy and get their versions
-
-			// TODO to be confirmed if the host is `host.namespace`
+		for _, app := range apps {
+			app.Destinations = getAppDestinations(app, dRules.DestinationRules)
 		}
 	}
 
 	if vServices != nil {
-		for _, vService := range vServices {
-			for _, app := range apps {
-				var matched = false
-				appAddr := virtualservice.FQDN(app.ObjectMeta.Name, app.ObjectMeta.Namespace)
-				for _, vsHost := range vService.Spec.Hosts {
-					svcAddr := virtualservice.FQDN(vsHost, vService.Namespace)
-					if appAddr == svcAddr {
-						app.VirtualServices = append(app.VirtualServices, vService)
-						matched = true
-						break
-					}
-				}
-
-				if matched {
-					continue
-				}
-
-				for _, http := range vService.Spec.Http {
-					for _, route := range http.Route {
-						svcAddr := virtualservice.FQDN(route.Destination.Host, vService.Namespace)
-						if appAddr == svcAddr {
-							app.VirtualServices = append(app.VirtualServices, vService)
-							break
-						}
-					}
-				}
-			}
+		for _, app := range apps {
+			app.VirtualServices = getAppVirtualServices(app, vServices)
 		}
 	}
 
@@ -160,6 +116,65 @@ func getApps(services *service.ServiceList, dRules *destinationrule.List, vServi
 		Apps:     apps,
 	}
 	return list, nil
+}
+
+func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []istioApi.VirtualService {
+	var virtualServices = make([]istioApi.VirtualService, 0)
+
+	if vServices == nil {
+		return virtualServices
+	}
+
+	for _, vService := range vServices {
+		var matched = false
+		appAddr := virtualservice.FQDN(app.ObjectMeta.Name, app.ObjectMeta.Namespace)
+		for _, vsHost := range vService.Spec.Hosts {
+			svcAddr := virtualservice.FQDN(vsHost, vService.Namespace)
+			if appAddr == svcAddr {
+				virtualServices = append(virtualServices, vService)
+				matched = true
+				break
+			}
+		}
+
+		if matched {
+			continue
+		}
+
+		for _, http := range vService.Spec.Http {
+			for _, route := range http.Route {
+				svcAddr := virtualservice.FQDN(route.Destination.Host, vService.Namespace)
+				if appAddr == svcAddr {
+					virtualServices = append(virtualServices, vService)
+					break
+				}
+			}
+		}
+	}
+	return virtualServices
+}
+
+func getAppDestinations(app *api.App, dRules []destinationrule.DestinationRuleDetail) []api.Destination {
+	destinations := make([]api.Destination, 0)
+
+	if dRules == nil {
+		return destinations
+	}
+
+	for _, dRule := range dRules {
+		svcAddr := virtualservice.FQDN(dRule.Host, dRule.ObjectMeta.Namespace)
+		appAddr := virtualservice.FQDN(app.ObjectMeta.Name, app.ObjectMeta.Namespace)
+		if appAddr == svcAddr {
+			for _, sub := range dRule.Subsets {
+				destinations = append(destinations, api.Destination{
+					Version:  sub.Name,
+					Selector: sub.Labels,
+				})
+			}
+			break
+		}
+	}
+	return destinations
 }
 
 // IsApp checks if the specified app, namespace is an app.
@@ -253,7 +268,7 @@ func CreateApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 		},
 	}
 
-	newDep, err = client.ExtensionsV1beta1().Deployments(namespace.ToRequestParam()).Create(newDep)
+	_, err = client.ExtensionsV1beta1().Deployments(namespace.ToRequestParam()).Create(newDep)
 	if err != nil {
 		return err
 	}
@@ -285,10 +300,11 @@ func CreateApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 
 // CanaryApp creates a canary version for the specified namespace
 // version is a logic canary meaning, doesn't need to bind to image version.
-func CanaryApp(client kubernetes.Interface, istioClient istio.Interface, namespace *common.NamespaceQuery, appName string, canaryDep *api.CanaryDeployment) error {
+func CanaryApp(client kubernetes.Interface, istioClient istio.Interface, namespace *common.NamespaceQuery,
+	appName string, canaryDep *api.CanaryDeployment) error {
 	version := canaryDep.Version
 
-	// 1. check if the specified app exist
+	// check if the specified app exist
 	dataSelector := dataselect.NoDataSelect
 	dataSelector.FilterQuery = dataselect.NewFilterQuery([]string{dataselect.NameProperty, appName})
 
@@ -297,7 +313,7 @@ func CanaryApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 		return err
 	}
 
-	// 2. check if the app is in canary
+	// check if the app is in canary
 	// if multiple destination rules exist
 	dRules, err := destinationrule.GetDestinationRuleListByHostname(client, istioClient, namespace, []string{appName})
 	if err != nil {
@@ -317,34 +333,16 @@ func CanaryApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 		parent = parentDeps[0]
 	}
 
-	if parent.Spec.Template.Labels["app"] == "" || parent.Spec.Template.Labels["version"] == "" {
-		return fmt.Errorf("parent deployment's pod template need to have app & version labels")
+	// fix parent deployment when some label is not set correctly.
+	if err := fixDeployment(client, &parent); err != nil {
+		return err
 	}
 
-	// TODO to be deleted fix parent deployment to match selector.
-	if parent.Spec.Selector.MatchLabels["app"] == "" || parent.Spec.Selector.MatchLabels["version"] == "" ||
-		parent.Labels["app"] == "" || parent.Labels["version"] == "" {
-		parent.Labels["app"] = appName
-		parent.Labels["version"] = parent.Spec.Template.Labels["version"]
-		parent.Spec.Selector.MatchLabels["app"] = appName
-		parent.Spec.Selector.MatchLabels["version"] = parent.Spec.Template.Labels["version"]
-		_, err := client.ExtensionsV1beta1().Deployments(namespace.ToRequestParam()).Update(&parent)
-		if err != nil {
-			fmt.Println("fail to fix parent deployment", err)
-			return err
-		}
-	}
-
-	// TODO update MatchLabels
+	// create new deployment
 	newPodSpec := canaryDep.PodTemplate
 	newPodSpec.Labels["app"] = appName
 	newPodSpec.Labels["qcloud-app"] = appName
 	newPodSpec.Labels["version"] = version
-
-	// if parent's version label is empty
-	if parent.Labels["version"] == "" || parent.Labels["app"] == "" {
-		return fmt.Errorf("parent deployment's app or version label is empty")
-	}
 
 	var replica int32
 	if canaryDep.Replicas > 0 {
@@ -382,14 +380,12 @@ func CanaryApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 		},
 	}
 
-	x, _ := json.Marshal(newDep)
-	log.Println("start to canary deployment: ", string(x))
 	newDep, err = client.ExtensionsV1beta1().Deployments(namespace.ToRequestParam()).Create(newDep)
 	if err != nil {
 		return err
 	}
 
-	// 4. create destination rule
+	// create destination rules
 	destinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace.ToRequestParam()).Get(appName, metaV1.GetOptions{})
 	if err != nil {
 		if kdErrors.IsNotFoundError(err) {
@@ -424,6 +420,31 @@ func CanaryApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 	}
 
 	return addToDestinationRule(istioClient, destinationRule, version, namespace.ToRequestParam())
+}
+
+// fixDeployment fixes the deployment's labels & matchLabels according to the podTemplate.
+// It checks whether the app & version labels exist for Istio running correctly.
+func fixDeployment(client kubernetes.Interface, parent *v1beta1.Deployment) error {
+	if parent.Spec.Template.Labels["app"] == "" || parent.Spec.Template.Labels["version"] == "" {
+		return fmt.Errorf("parent deployment's pod template need to have app & version labels")
+	}
+
+	appName := parent.Spec.Template.Labels["app"]
+	version := parent.Spec.Template.Labels["version"]
+
+	if parent.Spec.Selector.MatchLabels["app"] == "" || parent.Spec.Selector.MatchLabels["version"] == "" ||
+		parent.Labels["app"] == "" || parent.Labels["version"] == "" {
+		parent.Labels["app"] = appName
+		parent.Labels["version"] = version
+		parent.Spec.Selector.MatchLabels["app"] = appName
+		parent.Spec.Selector.MatchLabels["version"] = version
+		_, err := client.ExtensionsV1beta1().Deployments(parent.Namespace).Update(parent)
+		if err != nil {
+			log.Println("fail to fix parent deployment", err)
+			return err
+		}
+	}
+	return nil
 }
 
 // DeleteApp deletes application

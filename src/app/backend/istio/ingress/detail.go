@@ -23,7 +23,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -64,10 +64,10 @@ func GetIngress(k8sClient kubernetes.Interface, istioClient istio.Interface,
 		return nil, criticalError
 	}
 
-	return ToIngress(gateway, rawServices.Items, rawVs.Items), nil
+	return ToIngress(gateway, rawServices.Items, rawVs.Items, nonCriticalErrors), nil
 }
 
-func ToIngress(gateway *v1alpha3.Gateway, services []v1.Service, virtualServices []v1alpha3.VirtualService) *api.Ingress {
+func ToIngress(gateway *v1alpha3.Gateway, services []v1.Service, virtualServices []v1alpha3.VirtualService, nonCriticalErrors []error) *api.Ingress {
 	var hosts []common.Endpoint
 	var hostMapping = make(map[string][]common.ServicePort, 0)
 	for _, server := range gateway.Spec.Servers {
@@ -113,6 +113,7 @@ func ToIngress(gateway *v1alpha3.Gateway, services []v1.Service, virtualServices
 		Hosts:             hosts,
 		ExternalEndpoints: externalEndpoints,
 		VirtualServices:   filteredVs,
+		Errors:            nonCriticalErrors,
 	}
 }
 

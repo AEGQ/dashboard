@@ -19,9 +19,8 @@ import {ComponentsModule} from '../../../common/components/module';
 import {SharedModule} from '../../../shared.module';
 
 import {DestinationRuleComponent} from './detail/component';
-import {DestinationRuleList} from './list/component';
-
 import {destinationRuleDetailState} from './detail/state';
+import {DestinationRuleList} from './list/component';
 import {destinationRuleListState} from './list/state';
 import {destinationRuleState} from './state';
 

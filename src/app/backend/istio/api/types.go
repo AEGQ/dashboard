@@ -18,7 +18,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 type AppList struct {
@@ -78,4 +78,6 @@ type Ingress struct {
 	Hosts             []common.Endpoint         `json:"hosts,omitempty"`
 	ExternalEndpoints []common.Endpoint         `json:"externalEndpoints"`
 	VirtualServices   []v1alpha3.VirtualService `json:"virtualServices,omitempty"`
+
+	Errors []error `json:"errors"`
 }

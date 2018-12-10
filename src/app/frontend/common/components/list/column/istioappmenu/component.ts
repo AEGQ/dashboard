@@ -16,10 +16,10 @@ import {Component, Input} from '@angular/core';
 import {ObjectMeta, TypeMeta} from '@api/backendapi';
 import {ActionColumn} from '@api/frontendapi';
 import {StateService} from '@uirouter/core';
-import {Subscription} from "rxjs";
+import {Subscription} from 'rxjs';
 import {logsState} from '../../../../../logs/state';
 import {LogsStateParams} from '../../../../params/params';
-import {VerberService} from "../../../../services/global/verber";
+import {VerberService} from '../../../../services/global/verber';
 
 @Component({
   selector: 'kd-istio-app-menu',

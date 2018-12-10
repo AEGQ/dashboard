@@ -16,8 +16,8 @@ import {Component, Input} from '@angular/core';
 import {ObjectMeta, TypeMeta} from '@api/backendapi';
 import {ActionColumn} from '@api/frontendapi';
 import {StateService} from '@uirouter/core';
-import {Subscription} from "rxjs";
-import {VerberService} from "../../../../services/global/verber";
+import {Subscription} from 'rxjs';
+import {VerberService} from '../../../../services/global/verber';
 
 @Component({
   selector: 'kd-canary-button',
@@ -45,8 +45,7 @@ export class CanaryButtonComponent implements ActionColumn {
 
   onClick(): void {
     this.onClickSubscription_ = this.verber_.onDeployment.subscribe(this.onSuccess_.bind(this));
-    this.verber_.showDeploymentDialog(
-      this.typeMeta.kind, this.typeMeta, this.objectMeta);
+    this.verber_.showDeploymentDialog(this.typeMeta.kind, this.typeMeta, this.objectMeta);
   }
 
   private onSuccess_(): void {

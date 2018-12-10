@@ -68,7 +68,9 @@ export class IstioIngressComponent implements OnInit, OnDestroy {
     this.istioIngressSetName_ = this.state_.params.resourceName;
     this.istioIngressDetailSubscription_ =
         this.istioIngress_
-            .get(EndpointManager.resource(Resource.istioIngress, true).detail(), this.istioIngressSetName_)
+            .get(
+                EndpointManager.resource(Resource.istioIngress, true).detail(),
+                this.istioIngressSetName_)
             .startWith({})
             .subscribe((d: IstioIngress) => {
               this.istioIngress = d;
@@ -78,8 +80,7 @@ export class IstioIngressComponent implements OnInit, OnDestroy {
               if (Object.keys(this.istioIngress).length !== 0) {
                 this.drawLineBetweenTwoElement(this.appName, this.protocolName, this.link1);
               }
-              setTimeout(() => {
-              }, 0);
+              setTimeout(() => {}, 0);
             });
   }
 
@@ -133,7 +134,8 @@ export class IstioIngressComponent implements OnInit, OnDestroy {
         window.location.reload();
       }
     });
-    this.verber_.showTakeOverDialog(version, this.istioIngress.typeMeta, this.istioIngress.objectMeta);
+    this.verber_.showTakeOverDialog(
+        version, this.istioIngress.typeMeta, this.istioIngress.objectMeta);
   }
   onOffline(version: string): void {
     this.verber_.onOffline.subscribe((result: boolean) => {
@@ -142,7 +144,8 @@ export class IstioIngressComponent implements OnInit, OnDestroy {
         window.location.reload();
       }
     });
-    this.verber_.showOffLineDialog(version, this.istioIngress.typeMeta, this.istioIngress.objectMeta);
+    this.verber_.showOffLineDialog(
+        version, this.istioIngress.typeMeta, this.istioIngress.objectMeta);
   }
   ngOnDestroy(): void {
     this.istioIngressDetailSubscription_.unsubscribe();

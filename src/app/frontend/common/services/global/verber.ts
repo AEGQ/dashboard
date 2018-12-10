@@ -25,7 +25,7 @@ import {EditResourceDialog} from '../../dialogs/editresource/dialog';
 import {IstioItDialog} from '../../dialogs/istio/dialog';
 import {OfflineResourceDialog} from '../../dialogs/offlineresource/dialog';
 import {TakeOverDialog} from '../../dialogs/takeOver/dialog';
-import {IstioResource} from "../../resources/istioresource";
+import {IstioResource} from '../../resources/istioresource';
 import {RawResource} from '../../resources/rawresource';
 import {ResourceMeta} from './actionbar';
 import {CsrfTokenService} from './csrftoken';
@@ -67,7 +67,7 @@ export class VerberService {
           if (doOffline) {
             const url = IstioResource.getUrl(typeMeta, objectMeta);
             const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
-            this.http_.delete(url+`/${version}`, {headers: {[this.CONFIG.csrfHeaderName]: token}})
+            this.http_.delete(url + `/${version}`, {headers: {[this.CONFIG.csrfHeaderName]: token}})
                 .subscribe(() => {
                   this.onOffline.emit(true);
                 }, this.handleErrorResponse_.bind(this));
@@ -76,22 +76,24 @@ export class VerberService {
   }
 
   showIstioDeleteDialog(typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
-    const dialogConfig = this.getDialogConfig_("", typeMeta, objectMeta);
-    this.dialog_.open(DeleteResourceDialog, dialogConfig).afterClosed().subscribe(async (doDelete) => {
-      if (doDelete) {
-        const url = IstioResource.getUrl(typeMeta, objectMeta);
-        this.http_.delete(url).subscribe(() => {
-          this.onIstioDelete.emit(true);
-        }, this.handleErrorResponse_.bind(this));
-      }
-    });
+    const dialogConfig = this.getDialogConfig_('', typeMeta, objectMeta);
+    this.dialog_.open(DeleteResourceDialog, dialogConfig)
+        .afterClosed()
+        .subscribe(async (doDelete) => {
+          if (doDelete) {
+            const url = IstioResource.getUrl(typeMeta, objectMeta);
+            this.http_.delete(url).subscribe(() => {
+              this.onIstioDelete.emit(true);
+            }, this.handleErrorResponse_.bind(this));
+          }
+        });
   }
 
   showTakeOverDialog(version: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(version, typeMeta, objectMeta);
     this.dialog_.open(TakeOverDialog, dialogConfig).afterClosed().subscribe(async (doOffline) => {
       if (doOffline) {
-        const url = IstioResource.getUrl(typeMeta, objectMeta)+`/${version}/takeover`;
+        const url = IstioResource.getUrl(typeMeta, objectMeta) + `/${version}/takeover`;
         const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
         this.http_.post(url, {}, {headers: {[this.CONFIG.csrfHeaderName]: token}}).subscribe(() => {
           this.onTakeOver.emit(true);
@@ -117,7 +119,7 @@ export class VerberService {
     this.dialog_.open(DeploymentDialog, dialogConfig).afterClosed().subscribe(async (result) => {
       if (result) {
         const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
-        const url = IstioResource.getUrl(typeMeta, objectMeta)+`/canary`;
+        const url = IstioResource.getUrl(typeMeta, objectMeta) + `/canary`;
         result = JSON.parse(result);
         result.podTemplate = JSON.parse(result.podTemplateJSON);
         this.http_.post(url, result, {headers: {[this.CONFIG.csrfHeaderName]: token}})
@@ -133,7 +135,7 @@ export class VerberService {
     this.dialog_.open(IstioItDialog, dialogConfig).afterClosed().subscribe(async (result) => {
       if (result) {
         const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
-        const url = IstioResource.getUrl(typeMeta, objectMeta)+`/istio-it`;
+        const url = IstioResource.getUrl(typeMeta, objectMeta) + `/istio-it`;
         this.http_.post(url, result, {headers: {[this.CONFIG.csrfHeaderName]: token}})
             .subscribe(() => {
               this.onDeployment.emit(true);

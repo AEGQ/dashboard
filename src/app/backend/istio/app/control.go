@@ -35,6 +35,9 @@ func OfflineAppVersion(client kubernetes.Interface, istioClient istio.Interface,
 	)
 
 	virtualServices, err = virtualservice.GetVirtualServices(istioClient, []string{appName}, offlineType)
+	if err != nil {
+		return err
+	}
 
 	for _, vs := range virtualServices {
 		err = removeFromVirtualService(istioClient, &vs, version)
@@ -93,7 +96,7 @@ func removeFromDestinationRule(istioClient istio.Interface, rule *istioApi.Desti
 
 // removeFromVirtualService removes the specified subset from virtual service.
 func removeFromVirtualService(istioClient istio.Interface, service *istioApi.VirtualService, subset string) error {
-	for i, _ := range service.Spec.Http {
+	for i := range service.Spec.Http {
 		newRoute := []*istioApi.DestinationWeight{}
 		for _, dest := range service.Spec.Http[i].Route {
 			if dest.Destination.Subset != subset {

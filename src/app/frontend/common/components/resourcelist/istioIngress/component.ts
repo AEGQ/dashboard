@@ -28,7 +28,8 @@ import {NamespacedResourceService} from '../../../services/resource/resource';
 import {ListGroupIdentifiers, ListIdentifiers} from '../groupids';
 
 @Component({selector: 'kd-istio-ingress-list', templateUrl: './template.html'})
-export class IstioIngressListComponent extends ResourceListWithStatuses<IstioIngressList, IstioIngress> {
+export class IstioIngressListComponent extends
+    ResourceListWithStatuses<IstioIngressList, IstioIngress> {
   @Input() endpoint = EndpointManager.resource(Resource.istioIngress, true).list();
   constructor(
       state: StateService,
@@ -75,8 +76,7 @@ export class IstioIngressListComponent extends ResourceListWithStatuses<IstioIng
   }
 
   onDelete(resource: IstioIngress): void {
-    this.verber_.showDeleteDialog(
-      resource.typeMeta.kind, resource.typeMeta, resource.objectMeta);
+    this.verber_.showDeleteDialog(resource.typeMeta.kind, resource.typeMeta, resource.objectMeta);
   }
 
   getDisplayColumns(): string[] {

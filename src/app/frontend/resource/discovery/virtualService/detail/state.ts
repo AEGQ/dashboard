@@ -14,10 +14,10 @@
 
 import {Ng2StateDeclaration} from '@uirouter/angular';
 
+import {IstioAppDetailsActionbar} from '../../../../common/components/actionbars/istioappdetail/component';
 import {addNamespacedResourceStateParamsToUrl} from '../../../../common/params/params';
 import {stateName, stateUrl} from '../state';
 
-import {IstioAppDetailsActionbar} from "../../../../common/components/actionbars/istioappdetail/component";
 import {VirtualServiceComponent} from './component';
 
 export const virtualServiceDetailState: Ng2StateDeclaration = {

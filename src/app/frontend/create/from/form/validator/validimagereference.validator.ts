@@ -50,6 +50,5 @@ export class ValidImageReferenceValidator implements AsyncValidator, Validator {
     }
   }
 
-  ngOnChanges(): void {
-  }
+  ngOnChanges(): void {}
 }

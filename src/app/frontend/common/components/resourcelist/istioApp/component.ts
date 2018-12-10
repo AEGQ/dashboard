@@ -25,9 +25,9 @@ import {NotificationsService} from '../../../services/global/notifications';
 import {VerberService} from '../../../services/global/verber';
 import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {NamespacedResourceService} from '../../../services/resource/resource';
-import {CanaryButtonComponent} from "../../list/column/canarybutton/component";
-import {IstioAppMenuComponent} from "../../list/column/istioappmenu/component";
-import {LogsButtonComponent} from "../../list/column/logsbutton/component";
+import {CanaryButtonComponent} from '../../list/column/canarybutton/component';
+import {IstioAppMenuComponent} from '../../list/column/istioappmenu/component';
+import {LogsButtonComponent} from '../../list/column/logsbutton/component';
 import {ListGroupIdentifiers, ListIdentifiers} from '../groupids';
 
 @Component({selector: 'kd-istio-app-list', templateUrl: './template.html'})

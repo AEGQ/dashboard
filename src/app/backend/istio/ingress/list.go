@@ -22,7 +22,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
 	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -65,7 +65,7 @@ func ToIngressList(gateways []v1alpha3.Gateway, services []v1.Service, nonCritic
 	}
 
 	for _, gateway := range gateways {
-		ingressList.Items = append(ingressList.Items, *ToIngress(&gateway, services, nil))
+		ingressList.Items = append(ingressList.Items, *ToIngress(&gateway, services, nil, nil))
 	}
 
 	return ingressList

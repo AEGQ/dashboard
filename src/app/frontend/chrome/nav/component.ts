@@ -35,7 +35,7 @@ import {serviceListState} from '../../resource/discovery/service/list/state';
 import {discoveryState} from '../../resource/discovery/state';
 import {virtualServiceListState} from '../../resource/discovery/virtualService/list/state';
 import {istioAppListState} from '../../resource/istio/istioApp/list/state';
-import {istioIngressListState} from "../../resource/istio/istioIngresses/list/state";
+import {istioIngressListState} from '../../resource/istio/istioIngresses/list/state';
 import {istioState} from '../../resource/istio/state';
 import {cronJobListState} from '../../resource/workloads/cronjob/list/state';
 import {daemonSetListState} from '../../resource/workloads/daemonset/list/state';

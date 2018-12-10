@@ -47,7 +47,7 @@ import {serviceFutureState} from './resource/discovery/service/state';
 import {discoveryFutureState} from './resource/discovery/state';
 import {virtualServiceFutureState} from './resource/discovery/virtualService/state';
 import {istioAppFutureState} from './resource/istio/istioApp/state';
-import {istioIngressFutureState} from "./resource/istio/istioIngresses/state";
+import {istioIngressFutureState} from './resource/istio/istioIngresses/state';
 import {cronJobFutureState} from './resource/workloads/cronjob/state';
 import {daemonSetFutureState} from './resource/workloads/daemonset/state';
 import {deploymentFutureState} from './resource/workloads/deployment/state';

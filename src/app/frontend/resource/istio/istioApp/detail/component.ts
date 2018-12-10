@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {IstioApp, Service, ServiceList} from '@api/backendapi';
 import {ColumnWhenCondition} from '@api/frontendapi';
 import {StateService} from '@uirouter/core';
@@ -51,11 +52,9 @@ export class IstioAppComponent implements OnInit, OnDestroy {
       ['name', 'labels', 'clusterip', 'internalendp', 'externalendp', 'age'];
   constructor(
       private readonly istioApp_: NamespacedResourceService<IstioApp>,
-      private readonly actionbar_: ActionbarService,
-      private readonly state_: StateService,
+      private readonly actionbar_: ActionbarService, private readonly state_: StateService,
       private readonly notifications_: NotificationsService,
-      private readonly verber_: VerberService,
-  ) {
+      private readonly verber_: VerberService, private readonly sanitizer: DomSanitizer) {
     this.JSON = JSON;
     this.kdState_ = GlobalServicesModule.injector.get(KdStateService);
   }

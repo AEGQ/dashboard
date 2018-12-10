@@ -387,6 +387,14 @@ export interface IstioApp extends Resource {
   destinations: Destination[];
   destinationVersions: string[];
   virtualServices: VirtualService[];
+  metrics: AppMetric;
+}
+
+export interface AppMetric {
+  clientQps: string;
+  clientLatency: string;
+  serverQps: string;
+  serverLatency: string;
 }
 
 export interface Destination extends Resource {

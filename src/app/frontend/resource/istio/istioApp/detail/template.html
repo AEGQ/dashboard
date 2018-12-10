@@ -111,3 +111,34 @@ limitations under the License.
     </div>
   </div>
 </kd-card>
+
+
+<kd-card *ngIf="istioApp.metrics">
+
+  <div title>Metrics</div>
+  <div content>
+    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.clientQps)"
+            width="50%"
+            height="300"
+            frameborder="0">
+    </iframe>
+
+    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.clientLatency)"
+            width="50%"
+            height="300"
+            frameborder="0">
+    </iframe>
+
+    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.serverQps)"
+            width="50%"
+            height="300"
+            frameborder="0">
+    </iframe>
+
+    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.serverLatency)"
+            width="50%"
+            height="300"
+            frameborder="0">
+    </iframe>
+  </div>
+</kd-card>

@@ -78,6 +78,8 @@ func GetAppDetail(client kubernetes.Interface, istioClient istio.Interface, ns *
 	if result.ListMeta.TotalItems != 1 {
 		return nil, fmt.Errorf("one application expected, %d found", result.ListMeta.TotalItems)
 	}
+
+	result.Apps[0].Metrics = *GetAppMetrics(client, result.Apps[0])
 	return result.Apps[0], nil
 }
 

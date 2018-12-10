@@ -34,6 +34,19 @@ type App struct {
 	Status          Status                    `json:"status"`
 	VirtualServices []v1alpha3.VirtualService `json:"virtualServices,omitempty"`
 	Destinations    []Destination             `json:"destinations"`
+	Metrics         Metrics                   `json:"metrics,omitempty"`
+}
+
+// Metrics is Istio application metrics collected by Prometheus which is is the default
+// Grafana Dashboard provided by Istio, Metrics configures 4 metric panel urls.
+// for example:
+// http://grafana/d-solo/LJ_uJAvmk/istio-service-dashboard?refresh=10s&orgId=1&panelId=25&var-service={{appName}}&var-srcns=All&var-srcwl=All&var-dstns=All&var-dstwl=All
+// See: https://istio.io/docs/tasks/telemetry/using-istio-dashboard/
+type Metrics struct {
+	ClientQps     string `json:"clientQps,omitempty"`
+	ClientLatency string `json:"clientLatency,omitempty"`
+	ServerQps     string `json:"serverQps,omitempty"`
+	ServerLatency string `json:"serverLatency,omitempty"`
 }
 
 type Status struct {

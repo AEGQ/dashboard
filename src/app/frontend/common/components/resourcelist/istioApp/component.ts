@@ -64,9 +64,11 @@ export class IstioAppListComponent extends ResourceListWithStatuses<IstioAppList
 
   map(istioAppList: IstioAppList): IstioApp[] {
     istioAppList.apps.forEach(app => {
-      app.destinationVersions = app.destinations.map(destination => {
-        return destination.version;
-      });
+      if (app.destinations) {
+        app.destinationVersions = app.destinations.map(destination => {
+          return destination.version;
+        });
+      }
     });
     return istioAppList.apps;
   }

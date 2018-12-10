@@ -15,9 +15,9 @@
 import {HttpClient} from '@angular/common/http';
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatButtonToggleGroup, MatDialogRef} from '@angular/material';
+import {CanaryDeployment, CanaryDeploymentInput} from '@api/backendapi';
 import {dump as toYaml, load as fromYaml} from 'js-yaml';
 
-import {CanaryDeployment, CanaryDeploymentInput} from '../../../typings/backendapi';
 import {ResourceMeta} from '../../services/global/actionbar';
 
 enum EditorMode {
@@ -37,13 +37,8 @@ export class DeploymentDialog implements OnInit {
   @ViewChild('group') buttonToggleGroup: MatButtonToggleGroup;
   text = '';
   modes = EditorMode;
-  development: CanaryDeploymentInput = {
-    version: '',
-    replicas: 2,
-    description: '',
-    podTemplate: JSON.stringify({'a': 1}),
-    podTemplateJSON: ''
-  };
+  development: CanaryDeploymentInput =
+      {version: '', replicas: null, description: '', podTemplate: '', podTemplateJSON: ''};
 
   constructor(
       public dialogRef: MatDialogRef<DeploymentDialog>,

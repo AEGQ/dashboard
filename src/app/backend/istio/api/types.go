@@ -33,7 +33,7 @@ type App struct {
 
 	Status          Status                    `json:"status"`
 	VirtualServices []v1alpha3.VirtualService `json:"virtualServices,omitempty"`
-	Destinations    []Destination             `json:"destinations,omitempty"`
+	Destinations    []Destination             `json:"destinations"`
 }
 
 type Status struct {

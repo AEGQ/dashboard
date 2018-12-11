@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/emicklei/go-restful"
+	restful "github.com/emicklei/go-restful"
 	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
 	kdErrors "github.com/kubernetes/dashboard/src/app/backend/errors"
 	metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
@@ -83,17 +83,21 @@ func (self *IstioHandler) Install(ws *restful.WebService) {
 
 	// Istio Ingresses
 	ws.Route(
+		ws.GET("/istio/ingress").
+			To(self.handleGetIngresses).
+			Writes(api.IngressList{}))
+	ws.Route(
 		ws.GET("/istio/ingress/{namespace}").
 			To(self.handleGetIngresses).
-			Writes(nil))
+			Writes(api.IngressList{}))
 	ws.Route(
 		ws.POST("/istio/ingress/{namespace}/{name}").
 			To(self.handleCreateIngress).
-			Writes(nil))
+			Writes(api.Ingress{}))
 	ws.Route(
 		ws.GET("/istio/ingress/{namespace}/{name}").
 			To(self.handleGetIngress).
-			Writes(nil))
+			Writes(api.Ingress{}))
 	ws.Route(
 		ws.DELETE("/istio/ingress/{namespace}/{name}").
 			To(self.handleDeleteIngress).

@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <kd-object-meta [initialized]="isInitialized"
-                [objectMeta]="istioApp?.objectMeta"></kd-object-meta>
+                [objectMeta]="istioApp.objectMeta"></kd-object-meta>
 
-<kd-card>
+<kd-card [initialized]="isInitialized">
   <div title>Flow Control</div>
   <div content>
     <div class="flow-control">
@@ -116,26 +116,11 @@ limitations under the License.
 <kd-card *ngIf="istioApp.metrics">
 
   <div title>Metrics</div>
-  <div content>
-    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.clientQps)"
-            width="50%"
-            height="300"
-            frameborder="0">
-    </iframe>
+  <div content
+       *ngIf="isInitialized">
 
-    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.clientLatency)"
-            width="50%"
-            height="300"
-            frameborder="0">
-    </iframe>
-
-    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.serverQps)"
-            width="50%"
-            height="300"
-            frameborder="0">
-    </iframe>
-
-    <iframe [src]="sanitizer.bypassSecurityTrustResourceUrl(istioApp?.metrics?.serverLatency)"
+    <iframe *ngFor="let metric of metrics"
+            [src]="metric"
             width="50%"
             height="300"
             frameborder="0">

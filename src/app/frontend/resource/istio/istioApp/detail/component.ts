@@ -45,7 +45,10 @@ export class IstioAppComponent implements OnInit, OnDestroy {
   private istioAppSetName_: string;
   private readonly dynamicColumns_: ColumnWhenCondition[] = [];
   private readonly kdState_: KdStateService;
+
   istioApp: IstioApp;
+  metrics: SafeUrl[] = [];
+
   JSON: JSON;
   isInitialized = false;
   displayedColumns: string[] =
@@ -54,7 +57,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
       private readonly istioApp_: NamespacedResourceService<IstioApp>,
       private readonly actionbar_: ActionbarService, private readonly state_: StateService,
       private readonly notifications_: NotificationsService,
-      private readonly verber_: VerberService, private readonly sanitizer: DomSanitizer) {
+      private readonly verber_: VerberService, readonly sanitizer: DomSanitizer) {
     this.JSON = JSON;
     this.kdState_ = GlobalServicesModule.injector.get(KdStateService);
   }
@@ -71,6 +74,14 @@ export class IstioAppComponent implements OnInit, OnDestroy {
             .startWith({})
             .subscribe((d: IstioApp) => {
               this.istioApp = d;
+              if (d.metrics) {
+                this.metrics = [
+                  this.sanitizer.bypassSecurityTrustResourceUrl(d.metrics.clientQps),
+                  this.sanitizer.bypassSecurityTrustResourceUrl(d.metrics.clientLatency),
+                  this.sanitizer.bypassSecurityTrustResourceUrl(d.metrics.serverQps),
+                  this.sanitizer.bypassSecurityTrustResourceUrl(d.metrics.serverLatency)
+                ];
+              }
               this.notifications_.pushErrors(d.errors);
               this.actionbar_.onInit.emit(new ResourceMeta('Istio App', d.objectMeta, d.typeMeta));
               this.isInitialized = true;
@@ -140,6 +151,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
   getDetailsHref(resourceName: string, namespace?: string): string {
     return this.kdState_.href('service', resourceName, namespace);
   }
+
   shouldShowColumn(dynamicColName: string): boolean {
     const col = this.dynamicColumns_.find((condition) => {
       return condition.col === dynamicColName;
@@ -150,6 +162,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
 
     return false;
   }
+
   onTakeOver(version: string): void {
     this.verber_.onTakeOver.subscribe((result: boolean) => {
       if (result) {
@@ -158,6 +171,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
     });
     this.verber_.showTakeOverDialog(version, this.istioApp.typeMeta, this.istioApp.objectMeta);
   }
+
   onOffline(version: string): void {
     this.verber_.onOffline.subscribe((result: boolean) => {
       if (result) {
@@ -167,6 +181,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
     });
     this.verber_.showOffLineDialog(version, this.istioApp.typeMeta, this.istioApp.objectMeta);
   }
+
   ngOnDestroy(): void {
     this.istioAppDetailSubscription_.unsubscribe();
   }

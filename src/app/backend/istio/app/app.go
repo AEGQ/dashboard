@@ -84,7 +84,7 @@ func getApps(services *service.ServiceList, dRules *destinationrule.List, vServi
 		})
 	}
 
-	if dRules != nil {
+	if dRules != nil && dRules.DestinationRules != nil {
 		for _, app := range apps {
 			app.Destinations = getAppDestinations(app, dRules.DestinationRules)
 		}

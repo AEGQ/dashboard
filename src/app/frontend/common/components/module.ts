@@ -164,6 +164,7 @@ import {ZeroStateComponent} from './zerostate/component';
   exports: [
     AllocationChartComponent,
     CardComponent,
+    MenuComponent,
     ActionbarComponent,
     BreadcrumbsComponent,
     PropertyComponent,

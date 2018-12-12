@@ -369,11 +369,10 @@ export interface DestinationRuleList extends ResourceList {
 export interface VirtualService extends Resource {
   errors: K8sError[];
   hosts: string[];
-  http: Object[];
+  http: Http[];
   initContainerImages: string[];
   serviceList: ServiceList;
   destinationRuleList: DestinationRuleList;
-  spec: Spec;
 }
 
 export interface Gateway extends Resource {

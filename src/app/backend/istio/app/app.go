@@ -118,8 +118,8 @@ func getApps(services *service.ServiceList, dRules *destinationrule.List, vServi
 	return list, nil
 }
 
-func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []istioApi.VirtualService {
-	var virtualServices = make([]istioApi.VirtualService, 0)
+func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []virtualservice.VirtualService {
+	var virtualServices = make([]virtualservice.VirtualService, 0)
 
 	if vServices == nil {
 		return virtualServices
@@ -131,7 +131,7 @@ func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []
 		for _, vsHost := range vService.Spec.Hosts {
 			svcAddr := virtualservice.FQDN(vsHost, vService.Namespace)
 			if appAddr == svcAddr {
-				virtualServices = append(virtualServices, vService)
+				virtualServices = append(virtualServices, virtualservice.ToVirtualServiceDetail(&vService, nil, nil, nil))
 				matched = true
 				break
 			}
@@ -145,7 +145,7 @@ func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []
 			for _, route := range http.Route {
 				svcAddr := virtualservice.FQDN(route.Destination.Host, vService.Namespace)
 				if appAddr == svcAddr {
-					virtualServices = append(virtualServices, vService)
+					virtualServices = append(virtualServices, virtualservice.ToVirtualServiceDetail(&vService, nil, nil, nil))
 					break
 				}
 			}

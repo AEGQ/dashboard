@@ -48,6 +48,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
 
   istioApp: IstioApp;
   metrics: SafeUrl[] = [];
+  columnsToDisplay = ['name', 'namespace', 'action'];
 
   JSON: JSON;
   isInitialized = false;
@@ -96,7 +97,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
 
   generateLink(): void {
     if (this.istioApp.virtualServices && this.matchRuleDoms.toArray().length > 0) {
-      this.istioApp.virtualServices[0].spec.http.forEach((http, index) => {
+      this.istioApp.virtualServices[0].http.forEach((http, index) => {
         this.drawLineBetweenTwoElement(
             this.protocolName, this.matchRuleDoms.toArray()[index], this.link2);
         http.route.forEach(route => {

@@ -17,6 +17,7 @@ package api
 import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
 	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	v1 "k8s.io/api/core/v1"
 )
@@ -31,10 +32,10 @@ type App struct {
 	ObjectMeta api.ObjectMeta `json:"objectMeta"`
 	TypeMeta   api.TypeMeta   `json:"typeMeta"`
 
-	Status          Status                    `json:"status"`
-	VirtualServices []v1alpha3.VirtualService `json:"virtualServices,omitempty"`
-	Destinations    []Destination             `json:"destinations"`
-	Metrics         Metrics                   `json:"metrics,omitempty"`
+	Status          Status                          `json:"status"`
+	VirtualServices []virtualservice.VirtualService `json:"virtualServices,omitempty"`
+	Destinations    []Destination                   `json:"destinations"`
+	Metrics         Metrics                         `json:"metrics,omitempty"`
 }
 
 // Metrics is Istio application metrics collected by Prometheus which is is the default

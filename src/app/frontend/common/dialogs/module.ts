@@ -24,6 +24,7 @@ import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
 import {IstioItDialog} from './istio/dialog';
 import {OfflineResourceDialog} from './offlineresource/dialog';
+import {RedeployResourceDialog} from './redeployresource/dialog';
 import {TakeOverDialog} from './takeOver/dialog';
 
 @NgModule({
@@ -35,6 +36,7 @@ import {TakeOverDialog} from './takeOver/dialog';
     AlertDialog,
     EditResourceDialog,
     DeleteResourceDialog,
+    RedeployResourceDialog,
     LogsDownloadDialog,
     DeploymentDialog,
     IstioItDialog,
@@ -45,6 +47,7 @@ import {TakeOverDialog} from './takeOver/dialog';
     AlertDialog,
     EditResourceDialog,
     DeleteResourceDialog,
+    RedeployResourceDialog,
     LogsDownloadDialog,
     DeploymentDialog,
     IstioItDialog,
@@ -55,6 +58,7 @@ import {TakeOverDialog} from './takeOver/dialog';
     AlertDialog,
     EditResourceDialog,
     DeleteResourceDialog,
+    RedeployResourceDialog,
     LogsDownloadDialog,
     DeploymentDialog,
     IstioItDialog,

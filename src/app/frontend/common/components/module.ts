@@ -46,6 +46,7 @@ import {ColumnComponent} from './list/column/component';
 import {IstioAppMenuComponent} from './list/column/istioappmenu/component';
 import {LogsButtonComponent} from './list/column/logsbutton/component';
 import {MenuComponent} from './list/column/menu/component';
+import {RedeployButtonComponent} from './list/column/redeploybutton/component';
 import {CardListFilterComponent} from './list/filter/component';
 import {RowDetailComponent} from './list/rowdetail/component';
 import {LoadingSpinner} from './list/spinner/component';
@@ -131,6 +132,7 @@ import {ZeroStateComponent} from './zerostate/component';
     LogsButtonComponent,
     MenuComponent,
     CanaryButtonComponent,
+    RedeployButtonComponent,
     IstioAppMenuComponent,
     HiddenPropertyComponent,
     EventListComponent,
@@ -228,6 +230,7 @@ import {ZeroStateComponent} from './zerostate/component';
     RowDetailComponent,
     LogsButtonComponent,
     CanaryButtonComponent,
+    RedeployButtonComponent,
     IstioAppMenuComponent,
     MenuComponent,
     NamespaceChangeDialog,

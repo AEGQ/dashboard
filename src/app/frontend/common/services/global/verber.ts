@@ -24,9 +24,11 @@ import {DeploymentDialog} from '../../dialogs/deployment/dialog';
 import {EditResourceDialog} from '../../dialogs/editresource/dialog';
 import {IstioItDialog} from '../../dialogs/istio/dialog';
 import {OfflineResourceDialog} from '../../dialogs/offlineresource/dialog';
+import {RedeployResourceDialog} from '../../dialogs/redeployresource/dialog';
 import {TakeOverDialog} from '../../dialogs/takeOver/dialog';
 import {IstioResource} from '../../resources/istioresource';
 import {RawResource} from '../../resources/rawresource';
+
 import {ResourceMeta} from './actionbar';
 import {CsrfTokenService} from './csrftoken';
 
@@ -35,6 +37,7 @@ export class VerberService {
   onDelete = new EventEmitter<boolean>();
   onIstioDelete = new EventEmitter<boolean>();
   onEdit = new EventEmitter<boolean>();
+  onRedeploy = new EventEmitter<boolean>();
   onDeployment = new EventEmitter<boolean>();
   onOffline = new EventEmitter<boolean>();
   onTakeOver = new EventEmitter<boolean>();
@@ -128,6 +131,22 @@ export class VerberService {
             }, this.handleErrorResponse_.bind(this));
       }
     });
+  }
+
+  showRedeployDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(RedeployResourceDialog, dialogConfig)
+        .afterClosed()
+        .subscribe(async (result) => {
+          if (result) {
+            const url = `api/v1/deployment/${objectMeta.namespace}/${objectMeta.name}/redeploy`;
+            this.http_
+                .put(url, JSON.parse(result), {headers: {['Content-Type']: 'application/json'}})
+                .subscribe(() => {
+                  this.onRedeploy.emit(true);
+                }, this.handleErrorResponse_.bind(this));
+          }
+        });
   }
 
   showIstioItDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {

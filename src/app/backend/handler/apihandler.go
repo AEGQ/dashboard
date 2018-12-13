@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/emicklei/go-restful"
+	restful "github.com/emicklei/go-restful"
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/auth"
 	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
@@ -263,9 +263,9 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetDeploymentOldReplicaSets).
 			Writes(replicaset.ReplicaSetList{}))
 	apiV1Ws.Route(
-		apiV1Ws.PUT("/deployment/{namespace}/{deployment}/restart").
+		apiV1Ws.PUT("/deployment/{namespace}/{deployment}/redeploy").
 			To(apiHandler.handleRedeployDeployment).
-			Writes(common.EventList{}))
+			Writes(nil))
 
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/scale/{kind}/{namespace}/{name}/").

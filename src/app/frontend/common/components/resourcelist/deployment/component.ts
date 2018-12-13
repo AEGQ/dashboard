@@ -17,6 +17,7 @@ import {Component, ComponentFactoryResolver, Input} from '@angular/core';
 import {Deployment, DeploymentList, Event} from '@api/backendapi';
 import {StateService} from '@uirouter/core';
 import {Observable} from 'rxjs/Observable';
+
 import {deploymentState} from '../../../../resource/workloads/deployment/state';
 import {ResourceListWithStatuses} from '../../../resources/list';
 import {NamespaceService} from '../../../services/global/namespace';
@@ -24,6 +25,7 @@ import {NotificationsService} from '../../../services/global/notifications';
 import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {NamespacedResourceService} from '../../../services/resource/resource';
 import {MenuComponent} from '../../list/column/menu/component';
+import {RedeployButtonComponent} from '../../list/column/redeploybutton/component';
 import {ListGroupIdentifiers, ListIdentifiers} from '../groupids';
 
 @Component({
@@ -47,6 +49,7 @@ export class DeploymentListComponent extends ResourceListWithStatuses<Deployment
     this.registerBinding(this.icon.error, 'kd-error', this.isInErrorState);
 
     // Register action columns.
+    this.registerActionColumn<RedeployButtonComponent>('redeploy', RedeployButtonComponent);
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
     // Register dynamic columns.

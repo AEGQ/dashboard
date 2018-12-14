@@ -25,6 +25,7 @@ import {EditResourceDialog} from '../../dialogs/editresource/dialog';
 import {IstioItDialog} from '../../dialogs/istio/dialog';
 import {OfflineResourceDialog} from '../../dialogs/offlineresource/dialog';
 import {RedeployResourceDialog} from '../../dialogs/redeployresource/dialog';
+import {ScaleResourceDialog} from '../../dialogs/scaleresource/dialog';
 import {TakeOverDialog} from '../../dialogs/takeOver/dialog';
 import {IstioResource} from '../../resources/istioresource';
 import {RawResource} from '../../resources/rawresource';
@@ -42,6 +43,7 @@ export class VerberService {
   onOffline = new EventEmitter<boolean>();
   onTakeOver = new EventEmitter<boolean>();
   onIstioIt = new EventEmitter<boolean>();
+  onScale = new EventEmitter<boolean>();
 
   constructor(
       private readonly dialog_: MatDialog,
@@ -158,6 +160,24 @@ export class VerberService {
         this.http_.post(url, result, {headers: {[this.CONFIG.csrfHeaderName]: token}})
             .subscribe(() => {
               this.onDeployment.emit(true);
+            }, this.handleErrorResponse_.bind(this));
+      }
+    });
+  }
+
+  showScaleDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(ScaleResourceDialog, dialogConfig).afterClosed().subscribe((result) => {
+      if (Number.isInteger(result)) {
+        const url = `api/v1/scale/${typeMeta.kind}/${objectMeta.namespace}/${objectMeta.name}/`;
+        this.http_
+            .put(url, result, {
+              params: {
+                'scaleBy': result,
+              }
+            })
+            .subscribe(() => {
+              this.onScale.emit(true);
             }, this.handleErrorResponse_.bind(this));
       }
     });

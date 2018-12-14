@@ -23,10 +23,13 @@ import {ActionbarDetailDeleteComponent} from './actionbar/detailactions/delete/c
 import {ActionbarDetailEditComponent} from './actionbar/detailactions/edit/component';
 import {ActionbarDetailExecComponent} from './actionbar/detailactions/exec/component';
 import {ActionbarDetailLogsComponent} from './actionbar/detailactions/logs/component';
-import {DefaultDetailsActionbar} from './actionbars/defaultdetail/component';
+import {ActionbarDetailScaleComponent} from './actionbar/detailactions/scale/component';
+import {DefaultActionbar} from './actionbars/default/component';
 import {IstioAppDetailsActionbar} from './actionbars/istioappdetail/component';
-import {PodDetailsActionbar} from './actionbars/poddetail/component';
-import {ScaleableResourceDetailActionbar} from './actionbars/scaleableresourcedetail/component';
+import {LogsDefaultActionbar} from './actionbars/logsdefault/component';
+import {LogsExecDefaultActionbar} from './actionbars/logsexecdefault/component';
+import {LogsScaleDefaultActionbar} from './actionbars/logsscaledefault/component';
+import {ScaleDefaultActionbar} from './actionbars/scaledefault/component';
 import {AllocationChartComponent} from './allocationchart/component';
 import {BreadcrumbsComponent} from './breadcrumbs/component';
 import {CardComponent} from './card/component';
@@ -83,6 +86,7 @@ import {ServiceListComponent} from './resourcelist/service/component';
 import {StatefulSetListComponent} from './resourcelist/statefulset/component';
 import {StorageClassListComponent} from './resourcelist/storageclass/component';
 import {VirtualServiceListComponent} from './resourcelist/virtualservice/component';
+import {SparklineComponent} from './sparkline/component';
 import {TextInputComponent} from './textinput/component';
 import {UploadFileComponent} from './uploadfile/component';
 import {ZeroStateComponent} from './zerostate/component';
@@ -149,19 +153,23 @@ import {ZeroStateComponent} from './zerostate/component';
     ActionbarDetailActionsComponent,
     ActionbarDetailDeleteComponent,
     ActionbarDetailEditComponent,
+    ActionbarDetailScaleComponent,
     ActionbarDetailLogsComponent,
     ActionbarDetailExecComponent,
     ActionbarDetailCanaryComponent,
     UploadFileComponent,
-    DefaultDetailsActionbar,
-    PodDetailsActionbar,
-    ScaleableResourceDetailActionbar,
     IstioAppDetailsActionbar,
     VirtualServiceListComponent,
     DestinationRuleListComponent,
     IstioAppListComponent,
     IstioIngressListComponent,
-    GatewayListComponent
+    GatewayListComponent,
+    DefaultActionbar,
+    LogsDefaultActionbar,
+    ScaleDefaultActionbar,
+    LogsScaleDefaultActionbar,
+    LogsExecDefaultActionbar,
+    SparklineComponent,
   ],
   exports: [
     AllocationChartComponent,
@@ -212,18 +220,22 @@ import {ZeroStateComponent} from './zerostate/component';
     ActionbarDetailActionsComponent,
     ActionbarDetailDeleteComponent,
     ActionbarDetailEditComponent,
+    ActionbarDetailScaleComponent,
     ActionbarDetailLogsComponent,
     ActionbarDetailExecComponent,
     ActionbarDetailCanaryComponent,
     UploadFileComponent,
-    DefaultDetailsActionbar,
-    PodDetailsActionbar,
-    ScaleableResourceDetailActionbar,
     VirtualServiceListComponent,
     DestinationRuleListComponent,
     IstioAppListComponent,
     IstioIngressListComponent,
-    GatewayListComponent
+    GatewayListComponent,
+    DefaultActionbar,
+    LogsDefaultActionbar,
+    ScaleDefaultActionbar,
+    LogsScaleDefaultActionbar,
+    LogsExecDefaultActionbar,
+    SparklineComponent,
   ],
   entryComponents: [
     ChipDialog,

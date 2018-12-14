@@ -14,7 +14,7 @@
 
 import {Ng2StateDeclaration} from '@uirouter/angular';
 
-import {IstioAppDetailsActionbar} from '../../../../common/components/actionbars/istioappdetail/component';
+import {DefaultActionbar} from '../../../../common/components/actionbars/default/component';
 import {addNamespacedResourceStateParamsToUrl} from '../../../../common/params/params';
 import {stateName, stateUrl} from '../state';
 
@@ -34,7 +34,7 @@ export const virtualServiceDetailState: Ng2StateDeclaration = {
       component: VirtualServiceComponent,
     },
     'actionbar@chrome': {
-      component: IstioAppDetailsActionbar,
+      component: DefaultActionbar,
     }
   },
 };

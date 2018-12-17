@@ -23,9 +23,17 @@ limitations under the License.
     <mat-tab-group>
       <mat-tab label="Graph View">
         <div class="flow-control">
-          <div class="app-name">
-            <span #appName>{{istioApp?.objectMeta?.name}}</span>
+          <div class="app-name" #c1 >
+            <ng-container *ngFor="let virtualService of istioApp.virtualServices; let i = index">
+              <div *ngFor="let host of virtualService.hosts; let j = index" matTooltip="{{host}}" id="app-host-{{i}}-{{j}}">
+              {{host}}
+              </div>
+              <div *ngFor="let gateway of virtualService.gateways; let j = index" matTooltip="{{gateway}}" id="app-gateway-{{i}}-{{j}}">
+              {{gateway?.gateway}}
+              </div>
+            </ng-container>
           </div>
+
           <svg #link1>
             <defs>
               <marker id="arrow"
@@ -37,35 +45,28 @@ limitations under the License.
                       markerUnits="strokeWidth"
                       viewBox="0 0 15 15">
                 <path d="M0,0 L0,6 L9,3 z"
-                      fill="#2b62e2" />
+                      fill="#9fc1e2" />
               </marker>
             </defs>
           </svg>
-          <div>
-            <span #protocolName>http</span>
-            <!-- TODO: TCP/UDP/TLS -->
+
+          <div #c2 class="protocol">
+            <div #http>HTTP</div>
+            <div #tcp>TCP</div>
+            <div #tls>TLS</div>
           </div>
+
           <svg #link2> </svg>
-          <div *ngIf="istioApp.virtualServices; else defaultService">
-            <div *ngFor="let http of istioApp.virtualServices[0].http;let i = index;">
 
-              <div *ngIf="http.match"
-                   class="match-rule"
-                   #matchRule>
-                <span *ngFor="let match of http.match">
-                  {{JSON.stringify(match.headers)}}<br>
-                  {{JSON.stringify(match.method)}}
-                </span>
-              </div>
-
-              <div *ngIf="!http.match"
-                   class="match-rule"
-                   #matchRule>
-                <span>Default</span>
-              </div>
-
-            </div>
+          <div #c3 class="match-rule">
+            <ng-container *ngFor="let virtualService of istioApp.virtualServices; let i = index">
+              <div *ngFor="let http of virtualService.http; let j = index"
+                class="circle"
+                type="match"
+                id="app-operator-{{i}}-{{j}}">M</div>
+            </ng-container>
           </div>
+
           <ng-template #defaultService>
             <div>
               <div class="match-rule"
@@ -73,42 +74,20 @@ limitations under the License.
             </div>
           </ng-template>
 
-          <svg #link3> </svg>
+          <svg #link3></svg>
 
-          <div>
-            <div *ngFor="let destination of istioApp?.destinations"
-                 class="destination-wraper"
-                 [id]="destination.version">
-              <kd-property class="kd-inline-property">
-                <div key>version</div>
-                <div value>{{destination.version}}</div>
-              </kd-property>
-              <!-- <kd-property class="kd-inline-property">
-                <div key>selector</div>
-                <div value>
-                  <kd-chips [map]="destination.selector"
-                            minChipsVisible="4"></kd-chips>
-                </div>
-              </kd-property> -->
+          <div #c4>
+            <ng-container *ngFor="let destination of istioApp.destinations">
+              <div class="destination-wrapper" id="app-destination-{{destination?.version}}"
+                [matMenuTriggerFor]="canaryMenu">{{destination?.version}}</div>
 
-              <kd-property class="kd-inline-property">
-                <div key></div>
-                <div value>
-                  <mat-menu #canaryMenu="matMenu">
-                    <button mat-menu-item
-                            (click)="onTakeOver(destination.version)">Take Over</button>
-                    <button mat-menu-item
-                            (click)="onOffline(destination.version)">Offline</button>
-                  </mat-menu>
-
-                  <button mat-icon-button
-                          [matMenuTriggerFor]="canaryMenu">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                </div>
-              </kd-property>
-
-            </div>
+              <mat-menu #canaryMenu="matMenu">
+                <button mat-menu-item
+                        (click)="onTakeOver(destination.version)">Take Over</button>
+                <button mat-menu-item
+                        (click)="onOffline(destination.version)">Offline</button>
+              </mat-menu>
+            </ng-container>
           </div>
         </div>
       </mat-tab>

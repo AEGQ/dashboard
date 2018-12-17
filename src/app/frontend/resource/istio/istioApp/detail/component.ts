@@ -35,10 +35,11 @@ import {NamespacedResourceService} from '../../../../common/services/resource/re
 export class IstioAppComponent implements OnInit, OnDestroy {
   @ViewChild('appName') appName: ElementRef;
   @ViewChild('link1') link1: ElementRef;
-  @ViewChild('protocolName') protocolName: ElementRef;
   @ViewChild('link2') link2: ElementRef;
   @ViewChild('link3', {read: ElementRef}) link3: ElementRef;
-  @ViewChild('link4', {read: ElementRef}) link4: ElementRef;
+  @ViewChild('http') http: ElementRef;
+  @ViewChild('tcp') tcp: ElementRef;
+  @ViewChild('tls') tls: ElementRef;
   @ViewChildren('matchRule') matchRuleDoms!: QueryList<ElementRef>;
 
   private istioAppDetailSubscription_: Subscription;
@@ -52,8 +53,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
 
   JSON: JSON;
   isInitialized = false;
-  displayedColumns: string[] =
-      ['name', 'labels', 'clusterip', 'internalendp', 'externalendp', 'age'];
+
   constructor(
       private readonly istioApp_: NamespacedResourceService<IstioApp>,
       private readonly actionbar_: ActionbarService, private readonly state_: StateService,
@@ -86,40 +86,57 @@ export class IstioAppComponent implements OnInit, OnDestroy {
               this.notifications_.pushErrors(d.errors);
               this.actionbar_.onInit.emit(new ResourceMeta('Istio App', d.objectMeta, d.typeMeta));
               this.isInitialized = true;
-              if (Object.keys(this.istioApp).length !== 0) {
-                this.drawLineBetweenTwoElement(this.appName, this.protocolName, this.link1);
-              }
               setTimeout(() => {
-                this.generateLink();
+                this.drawLines();
               }, 0);
             });
   }
 
-  generateLink(): void {
-    if (this.istioApp.virtualServices && this.matchRuleDoms.toArray().length > 0) {
-      this.istioApp.virtualServices[0].http.forEach((http, index) => {
-        this.drawLineBetweenTwoElement(
-            this.protocolName, this.matchRuleDoms.toArray()[index], this.link2);
-        http.route.forEach(route => {
-          this.drawLineBetweenTwoElement(
-              this.matchRuleDoms.toArray()[index],
-              new ElementRef(document.getElementById(route.destination.subset)), this.link3);
-        });
+  drawLines(): void {
+    const lines: ElementRef[][] = [];
+
+    if (this.istioApp.virtualServices) {
+      this.istioApp.virtualServices.forEach((v, i) => {
+        const sourceNodes: ElementRef[] = [];
+        if (v.hosts) {
+          v.hosts.forEach((_, j) => {
+            sourceNodes.push(new ElementRef(document.getElementById('app-host-' + i + '-' + j)));
+          });
+        }
+
+        if (v.gateways) {
+          v.gateways.forEach((_, j) => {
+            sourceNodes.push(new ElementRef(document.getElementById('app-gateway-' + i + '-' + j)));
+          });
+        }
+
+        if (v.http) {
+          v.http.forEach((h, j) => {
+            const matchNode: ElementRef =
+                new ElementRef(document.getElementById('app-operator-' + i + '-' + j));
+            h.route.forEach((r) => {
+              const destinationNode: ElementRef = new ElementRef(
+                  document.getElementById('app-destination-' + r.destination.subset));
+              lines.push([matchNode, destinationNode, this.link3]);
+            });
+
+            lines.push([this.http, matchNode, this.link2]);
+          });
+
+          Array.from(sourceNodes).forEach((sn: ElementRef, _) => {
+            lines.push([sn, this.http, this.link1]);
+          });
+        }
       });
     }
-    if (!this.istioApp.virtualServices && this.istioApp.destinations) {
-      this.drawLineBetweenTwoElement(
-          this.protocolName, this.matchRuleDoms.toArray()[0], this.link2);
-      this.istioApp.destinations.forEach(destination => {
-        this.drawLineBetweenTwoElement(
-            this.matchRuleDoms.toArray()[0],
-            new ElementRef(document.getElementById(destination.version)), this.link3);
-      });
-    }
+
+    lines.forEach((e, _) => {
+      this.drawLineBetweenTwoElement(e[0], e[1], e[2]);
+    });
   }
 
   drawLineBetweenTwoElement(start: ElementRef, end: ElementRef, svgName: ElementRef): void {
-    const startY = '' +
+    const startY =
         (start.nativeElement.getBoundingClientRect().top -
          svgName.nativeElement.getBoundingClientRect().top +
          start.nativeElement.getBoundingClientRect().height / 2);
@@ -128,19 +145,17 @@ export class IstioAppComponent implements OnInit, OnDestroy {
         (end.nativeElement.getBoundingClientRect().left -
          svgName.nativeElement.getBoundingClientRect().left);
 
-    const endY = '' +
+    const endY =
         (end.nativeElement.getBoundingClientRect().top -
          svgName.nativeElement.getBoundingClientRect().top +
          end.nativeElement.getBoundingClientRect().height / 2);
 
-    const newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    newLine.setAttribute('id', 'line');
-    newLine.setAttribute('x1', '0');
-    newLine.setAttribute('y1', startY);
-    newLine.setAttribute('x2', '' + (endX - 40));
-    newLine.setAttribute('y2', endY);
-    newLine.setAttribute('stroke', '#2b62e2');
-    newLine.setAttribute('stroke-width', '4');
+    const newLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const d = `M${0} ${startY} C ${endX / 2} ${startY} ${endX / 2} ${endY} ${endX - 10} ${endY}`;
+    newLine.setAttribute('d', d);
+    newLine.setAttribute('stroke-width', '2');
+    newLine.setAttribute('stroke', '#9fc1e2');
+    newLine.setAttribute('fill', 'transparent');
     newLine.setAttribute('marker-end', 'url(#arrow)');
     svgName.nativeElement.append(newLine);
   }

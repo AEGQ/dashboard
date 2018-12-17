@@ -62,19 +62,19 @@ export interface CapacityItem {
   quantity: string;
 }
 
-export interface host {
+export interface IstioHost {
   hosts: string[];
-  port: port[];
-  tls: tls;
+  port: IstioPort[];
+  tls: Tls;
 }
 
-export interface port {
+interface IstioPort {
   name: string;
   number: number;
   protocol: string;
 }
 
-export interface tls {
+export interface Tls {
   mode: string;
   privateKey: string;
   serverCertificate: string;
@@ -179,7 +179,7 @@ export interface VirtualServiceList extends ResourceList {
 }
 
 interface GatewayList extends ResourceList {
-  gateways: Gateway[]
+  gateways: Gateway[];
 }
 
 export interface IstioAppList extends ResourceList {
@@ -358,17 +358,18 @@ export interface Service extends Resource {
 export interface DestinationRules extends Resource {
   errors: K8sError[];
   subsets: Object[];
-  host: host;
+  host: IstioHost;
   string: string;
 }
 
 export interface DestinationRuleList extends ResourceList {
-  destinationRules: DestinationRules[]
+  destinationRules: DestinationRules[];
 }
 
 export interface VirtualService extends Resource {
   errors: K8sError[];
   hosts: string[];
+  gateways: string[];
   http: Http[];
   initContainerImages: string[];
   serviceList: ServiceList;
@@ -377,7 +378,7 @@ export interface VirtualService extends Resource {
 
 export interface Gateway extends Resource {
   errors: K8sError[];
-  servers: host[];
+  servers: IstioHost[];
   selector: object;
 }
 
@@ -1196,7 +1197,7 @@ interface Strategy {
   rollingUpdate: RollingUpdate;
 }
 
-interface template {metadata: Metadata, spec: string}
+interface Template {metadata: Metadata; spec: string;}
 
 interface Spec {
   progressDeadlineSeconds: number;
@@ -1205,7 +1206,7 @@ interface Spec {
   selector: LabelSelector;
   matchLabels: StringMap;
   strategy: Strategy;
-  template: template;
+  template: Template;
   http: Http[];
 }
 

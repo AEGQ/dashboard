@@ -40,7 +40,7 @@ import (
 const (
 	// DescriptionAnnotationKey is annotation key for a description.
 	DescriptionAnnotationKey = "description"
-	ReDeployCountKey         = "ReDeployCount"
+	ReDeployCountKey         = "deployment.redeploy.count"
 )
 
 // AppDeploymentSpec is a specification for an app deployment.

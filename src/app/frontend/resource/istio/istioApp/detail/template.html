@@ -29,7 +29,7 @@ limitations under the License.
               {{host}}
               </div>
               <div *ngFor="let gateway of virtualService.gateways; let j = index" matTooltip="{{gateway}}" id="app-gateway-{{i}}-{{j}}">
-              {{gateway?.gateway}}
+              {{gateway}}
               </div>
             </ng-container>
           </div>
@@ -77,6 +77,7 @@ limitations under the License.
           <svg #link3></svg>
 
           <div #c4>
+            <div class="destination-wrapper" id="app-any-destination" style="background: #3a5b5d;">Any</div>
             <ng-container *ngFor="let destination of istioApp.destinations">
               <div class="destination-wrapper" id="app-destination-{{destination?.version}}"
                 [matMenuTriggerFor]="canaryMenu">{{destination?.version}}</div>

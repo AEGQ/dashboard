@@ -125,7 +125,7 @@ func (self *IstioHandler) handleGetApps(request *restful.Request, response *rest
 	// if service has destination rules with the same host name with service, treat them as the
 	// gray release
 	// app_name, versions, label, created_at
-	result, err := app.GetApps(client, istioClient, parseNamespacePathParameter(request), parseDataSelectPathParameter(request))
+	result, err := app.GetAppList(client, istioClient, parseNamespacePathParameter(request), parseDataSelectPathParameter(request))
 	if err != nil {
 		return
 	}

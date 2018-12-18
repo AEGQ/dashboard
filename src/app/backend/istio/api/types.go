@@ -26,6 +26,9 @@ type AppList struct {
 	ListMeta api.ListMeta `json:"listMeta"`
 
 	Apps []*App `json:"apps"`
+
+	// List of non-critical errors, that occurred during resource retrieval.
+	Errors []error `json:"errors"`
 }
 
 type App struct {

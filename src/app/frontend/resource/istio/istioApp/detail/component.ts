@@ -115,8 +115,14 @@ export class IstioAppComponent implements OnInit, OnDestroy {
             const matchNode: ElementRef =
                 new ElementRef(document.getElementById('app-operator-' + i + '-' + j));
             h.route.forEach((r) => {
-              const destinationNode: ElementRef = new ElementRef(
-                  document.getElementById('app-destination-' + r.destination.subset));
+              const subset = r.destination.subset;
+              let destinationNode: ElementRef;
+              if (subset) {
+                destinationNode =
+                    new ElementRef(document.getElementById('app-destination-' + subset));
+              } else {
+                destinationNode = new ElementRef(document.getElementById('app-any-destination'));
+              }
               lines.push([matchNode, destinationNode, this.link3]);
             });
 

@@ -15,16 +15,15 @@
 package app
 
 import (
-	"fmt"
-
+	api2 "github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/istio/api"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/destinationrule"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/namespace"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/service"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
+	istioApi "github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -38,49 +37,63 @@ func GetAppDeploySpec(client kubernetes.Interface, namespace *common.NamespaceQu
 }
 
 // GetAppDetail queries the specified application's deploy.
-func GetAppDetail(client kubernetes.Interface, istioClient istio.Interface, ns *common.NamespaceQuery, appName string, dataSelect *dataselect.DataSelectQuery) (*api.App, error) {
-	dRules, err := destinationrule.GetDestinationRuleList(client, istioClient, ns, dataselect.NoDataSelect)
+func GetAppDetail(client kubernetes.Interface, istioClient istio.Interface, nsQuery *common.NamespaceQuery, appName string, dataSelect *dataselect.DataSelectQuery) (*api.App, error) {
+	dRules, err := istioClient.Networking().DestinationRules(nsQuery.ToRequestParam()).List(metaV1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	services, err := service.GetServiceList(client, ns, dataSelect)
+	svc, err := client.CoreV1().Services(nsQuery.ToRequestParam()).Get(appName, metaV1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO to be refactored
-	svcs := []service.Service{}
-	for _, svc := range services.Services {
-		if svc.ObjectMeta.Name == appName {
-			svcs = append(svcs, svc)
-		}
-	}
-	services.Services = svcs
-	services.ListMeta.TotalItems = len(svcs)
-
-	vServices, err := virtualservice.GetVirtualServices(istioClient, []string{virtualservice.FQDN(appName, ns.ToRequestParam())}, virtualservice.All)
+	vServices, err := virtualservice.GetVirtualServices(istioClient, []string{virtualservice.FQDN(appName, nsQuery.ToRequestParam())}, virtualservice.All)
 	if err != nil {
 		return nil, err
 	}
 
-	namespaces, err := namespace.GetNamespaceList(client, dataselect.NoDataSelect)
+	ns, err := namespace.GetNamespaceDetail(client, nsQuery.ToRequestParam())
 	if err != nil {
 		return nil, err
 	}
 
 	// merge destinationRules & services
-	result, err := getApps(services, dRules, vServices, namespaces)
-	if err != nil {
-		return nil, err
+	var app = getAppDetail(svc, vServices, dRules.Items, ns)
+	app.Metrics = *GetAppMetrics(client, app)
+	return app, nil
+}
+
+func getAppDetail(svc *v1.Service, vServices []istioApi.VirtualService,
+	dRules []istioApi.DestinationRule, namespace *namespace.NamespaceDetail) *api.App {
+	app := &api.App{
+		ObjectMeta: api2.NewObjectMeta(svc.ObjectMeta),
+		TypeMeta: api2.TypeMeta{
+			Kind: api2.ResourceKindApp,
+		},
+		Destinations: []api.Destination{
+			{
+				Version:  "default",
+				Selector: svc.Spec.Selector,
+			},
+		},
 	}
 
-	if result.ListMeta.TotalItems != 1 {
-		return nil, fmt.Errorf("one application expected, %d found", result.ListMeta.TotalItems)
+	if dRules != nil && len(dRules) > 0 {
+		app.Destinations = getAppDestinations(app, dRules)
 	}
 
-	result.Apps[0].Metrics = *GetAppMetrics(client, result.Apps[0])
-	return result.Apps[0], nil
+	if vServices != nil && len(vServices) > 0 {
+		app.VirtualServices = getAppVirtualServices(app, vServices)
+	}
+
+	// add these applications' istio statuses
+	if namespace != nil {
+		if namespace.ObjectMeta.Labels["istio-injection"] == "enabled" {
+			app.Status.Istio = true
+		}
+	}
+	return app
 }
 
 // getDeploymentByLabels filters deployments by the labels.

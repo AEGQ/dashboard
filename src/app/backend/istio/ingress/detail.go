@@ -21,6 +21,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/errors"
 	"github.com/kubernetes/dashboard/src/app/backend/istio/api"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
 	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
 	v1 "k8s.io/api/core/v1"
@@ -98,11 +99,11 @@ func ToIngress(gateway *v1alpha3.Gateway, services []v1.Service, virtualServices
 		externalEndpoints = append(externalEndpoints, common.GetExternalEndpoints(svc)...)
 	}
 
-	var filteredVs []v1alpha3.VirtualService
+	var filteredVs []virtualservice.VirtualService
 	if virtualServices != nil {
 		for _, vs := range virtualServices {
 			if contains(vs.Spec.Gateways, gateway.Name) {
-				filteredVs = append(filteredVs, vs)
+				filteredVs = append(filteredVs, virtualservice.ToVirtualServiceDetail(&vs, nil, nil, nil))
 			}
 		}
 	}

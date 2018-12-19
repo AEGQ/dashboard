@@ -17,61 +17,41 @@ limitations under the License.
 <kd-object-meta [initialized]="isInitialized"
                 [objectMeta]="istioIngress?.objectMeta"></kd-object-meta>
 
-<kd-card>
+<kd-card [initialized]="isInitialized"
+         role="table">
   <div title>Flow Control</div>
-  <div content>
-    <div class="flow-control">
-      <div class="app-name">
-        <span #appName>{{istioIngress?.objectMeta?.name}}</span>
-      </div>
-      <svg #link1>
-        <defs>
-          <marker id="arrow"
-                  markerWidth="9"
-                  markerHeight="6"
-                  refX="0"
-                  refY="3"
-                  orient="auto"
-                  markerUnits="strokeWidth"
-                  viewBox="0 0 15 15">
-            <path d="M0,0 L0,6 L9,3 z"
-                  fill="#2b62e2" />
-          </marker>
-        </defs>
-      </svg>
-      <div>
-        <span #protocolName>http</span>
-        <!-- TODO: TCP/UDP/TLS -->
-      </div>
-      <svg #link2> </svg>
-      <div *ngIf="istioIngress.virtualServices; else defaultService">
-        <div *ngFor="let http of istioIngress.virtualServices[0].spec.http;let i = index;">
 
-          <div *ngIf="http.match"
-               class="match-rule"
-               #matchRule>
-            <span *ngFor="let match of http.match">
-              {{JSON.stringify(match.headers)}}<br>
-              {{JSON.stringify(match.method)}}
-            </span>
-          </div>
-
-          <div *ngIf="!http.match"
-               class="match-rule"
-               #matchRule>
-            <span>Default</span>
-          </div>
-
-        </div>
-      </div>
-      <ng-template #defaultService>
-        <div>
-          <div class="match-rule"
-               #matchRule>Default Service</div>
-        </div>
-      </ng-template>
-
-      <svg #link3> </svg>
+  <div description>
+    <div class="kd-inline-property"
+         *ngIf="istioIngress?.virtualServices?.length">
+      <span class="kd-muted-light">Items:&nbsp;</span>
+      <span>{{istioIngress.virtualServices.length}}</span>
     </div>
+  </div>
+
+  <div content>
+    <mat-table [dataSource]="istioIngress?.virtualServices"
+               class="kd-table-no-footer">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+        <mat-cell *matCellDef="let virtualService"> {{virtualService?.objectMeta?.name}} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="namespace">
+        <mat-header-cell *matHeaderCellDef> Namespace </mat-header-cell>
+        <mat-cell *matCellDef="let virtualService"> {{virtualService?.objectMeta?.namespace}} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let virtualService">
+          <kd-resource-context-menu [objectMeta]="virtualService?.objectMeta"
+                                    [typeMeta]="virtualService?.typeMeta"></kd-resource-context-menu>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+      <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
+    </mat-table>
   </div>
 </kd-card>

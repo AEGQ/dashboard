@@ -23,13 +23,18 @@ limitations under the License.
     <mat-tab-group>
       <mat-tab label="Graph View">
         <div class="flow-control">
-          <div class="app-name" #c1 >
+          <div class="app-name"
+               #c1>
             <ng-container *ngFor="let virtualService of istioApp.virtualServices; let i = index">
-              <div *ngFor="let host of virtualService.hosts; let j = index" matTooltip="{{host}}" id="app-host-{{i}}-{{j}}">
-              {{host}}
+              <div *ngFor="let host of virtualService.hosts; let j = index"
+                   matTooltip="{{host}}"
+                   id="app-host-{{i}}-{{j}}">
+                {{host}}
               </div>
-              <div *ngFor="let gateway of virtualService.gateways; let j = index" matTooltip="{{gateway}}" id="app-gateway-{{i}}-{{j}}">
-              {{gateway}}
+              <div *ngFor="let gateway of virtualService.gateways; let j = index"
+                   matTooltip="{{gateway}}"
+                   id="app-gateway-{{i}}-{{j}}">
+                {{gateway}}
               </div>
             </ng-container>
           </div>
@@ -50,7 +55,8 @@ limitations under the License.
             </defs>
           </svg>
 
-          <div #c2 class="protocol">
+          <div #c2
+               class="protocol">
             <div #http>HTTP</div>
             <div #tcp>TCP</div>
             <div #tls>TLS</div>
@@ -58,12 +64,13 @@ limitations under the License.
 
           <svg #link2> </svg>
 
-          <div #c3 class="match-rule">
+          <div #c3
+               class="match-rule">
             <ng-container *ngFor="let virtualService of istioApp.virtualServices; let i = index">
               <div *ngFor="let http of virtualService.http; let j = index"
-                class="circle"
-                type="match"
-                id="app-operator-{{i}}-{{j}}">M</div>
+                   class="circle"
+                   type="match"
+                   id="app-operator-{{i}}-{{j}}">M</div>
             </ng-container>
           </div>
 
@@ -77,10 +84,13 @@ limitations under the License.
           <svg #link3></svg>
 
           <div #c4>
-            <div class="destination-wrapper" id="app-any-destination" style="background: #3a5b5d;">Any</div>
+            <div class="destination-wrapper"
+                 id="app-any-destination"
+                 style="background: #3a5b5d;">Any</div>
             <ng-container *ngFor="let destination of istioApp.destinations">
-              <div class="destination-wrapper" id="app-destination-{{destination?.version}}"
-                [matMenuTriggerFor]="canaryMenu">{{destination?.version}}</div>
+              <div class="destination-wrapper"
+                   id="app-destination-{{destination?.version}}"
+                   [matMenuTriggerFor]="canaryMenu">{{destination?.version}}</div>
 
               <mat-menu #canaryMenu="matMenu">
                 <button mat-menu-item
@@ -93,39 +103,29 @@ limitations under the License.
         </div>
       </mat-tab>
       <mat-tab label="Code">
-        <table mat-table
-               [dataSource]="istioApp?.virtualServices"
-               class="mat-elevation-z8"
-               style="width: 100%;">
+        <mat-table [dataSource]="istioApp?.virtualServices"
+                   class="kd-table-no-footer">
           <ng-container matColumnDef="name">
-            <th mat-header-cell
-                *matHeaderCellDef> Name </th>
-            <td mat-cell
-                *matCellDef="let virtualService"> {{virtualService?.objectMeta?.name}} </td>
+            <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+            <mat-cell *matCellDef="let virtualService"> {{virtualService?.objectMeta?.name}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="namespace">
-            <th mat-header-cell
-                *matHeaderCellDef> Namespace </th>
-            <td mat-cell
-                *matCellDef="let virtualService"> {{virtualService?.objectMeta?.namespace}} </td>
+            <mat-header-cell *matHeaderCellDef> Namespace </mat-header-cell>
+            <mat-cell *matCellDef="let virtualService"> {{virtualService?.objectMeta?.namespace}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="action">
-            <th mat-header-cell
-                *matHeaderCellDef></th>
-            <td mat-cell
-                *matCellDef="let virtualService">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let virtualService">
               <kd-resource-context-menu [objectMeta]="virtualService?.objectMeta"
                                         [typeMeta]="virtualService?.typeMeta"></kd-resource-context-menu>
-            </td>
+            </mat-cell>
           </ng-container>
 
-          <tr mat-header-row
-              *matHeaderRowDef="columnsToDisplay"></tr>
-          <tr mat-row
-              *matRowDef="let myRowData; columns: columnsToDisplay"></tr>
-        </table>
+          <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+          <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
+        </mat-table>
       </mat-tab>
     </mat-tab-group>
   </div>

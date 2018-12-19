@@ -18,7 +18,6 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
-	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -92,9 +91,9 @@ type Ingress struct {
 	ObjectMeta api.ObjectMeta `json:"objectMeta"`
 	TypeMeta   api.TypeMeta   `json:"typeMeta"`
 
-	Hosts             []common.Endpoint         `json:"hosts,omitempty"`
-	ExternalEndpoints []common.Endpoint         `json:"externalEndpoints"`
-	VirtualServices   []v1alpha3.VirtualService `json:"virtualServices,omitempty"`
+	Hosts             []common.Endpoint               `json:"hosts,omitempty"`
+	ExternalEndpoints []common.Endpoint               `json:"externalEndpoints"`
+	VirtualServices   []virtualservice.VirtualService `json:"virtualServices,omitempty"`
 
 	Errors []error `json:"errors"`
 }

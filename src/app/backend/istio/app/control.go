@@ -275,6 +275,7 @@ func CreateApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 	return nil
 }
 
+// OfflineAppVersion offlines the specified app version from the virtualService with the same name.
 func OfflineAppVersion(client kubernetes.Interface, istioClient istio.Interface, namespace *common.NamespaceQuery,
 	appName string, version string, offlineType string) error {
 	var (

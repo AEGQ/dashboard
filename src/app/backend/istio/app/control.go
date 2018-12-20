@@ -459,7 +459,7 @@ func TakeOverAllTraffic(client kubernetes.Interface, istioClient istio.Interface
 			},
 		}
 
-		_, err = istioClient.NetworkingV1alpha3().VirtualServices(namespace.ToRequestParam()).Update(&oldvsb)
+		_, err = istioClient.NetworkingV1alpha3().VirtualServices(oldvsb.Namespace).Update(&oldvsb)
 		if err != nil {
 			return err
 		}

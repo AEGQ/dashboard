@@ -208,12 +208,12 @@ func (self *IstioHandler) handleAppTakeOverAllTraffic(request *restful.Request, 
 	namespace := parseNamespacePathParameter(request)
 	appName := request.PathParameter("app")
 	version := request.PathParameter("version")
-	offlineType := request.QueryParameter("offlineType")
-	if offlineType == "" {
-		offlineType = virtualservice.OnlyHost
+	targetType := request.QueryParameter("targetType")
+	if targetType == "" {
+		targetType = virtualservice.All
 	}
 
-	err = app.TakeOverAllTraffic(client, istioClient, namespace, appName, version, offlineType)
+	err = app.TakeOverAllTraffic(client, istioClient, namespace, appName, version, targetType)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return

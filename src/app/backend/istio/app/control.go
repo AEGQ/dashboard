@@ -445,24 +445,24 @@ func TakeOverAllTraffic(client kubernetes.Interface, istioClient istio.Interface
 		return err
 	}
 
-	for _, oldvsb := range virtualServices {
-		oldvsb.Spec.Http = []*istioApi.HTTPRoute{
-			{
-				Route: []*istioApi.DestinationWeight{
-					{
-						Destination: &istioApi.Destination{
-							Host:   appName,
-							Subset: version,
-						},
-					},
-				},
-			},
-		}
-
-		_, err = istioClient.NetworkingV1alpha3().VirtualServices(oldvsb.Namespace).Update(&oldvsb)
+	for _, vs := range virtualServices {
+		overrideSubset(&vs, appName, namespace.ToRequestParam(), version)
+		_, err = istioClient.NetworkingV1alpha3().VirtualServices(vs.Namespace).Update(&vs)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func overrideSubset(vs *istioApi.VirtualService, host, namespace, subset string) {
+	host = virtualservice.FQDN(host, namespace)
+	for i := range vs.Spec.Http {
+		// override all destination host equals to the specified host with specified subset
+		for j := range vs.Spec.Http[i].Route {
+			if host == virtualservice.FQDN(vs.Spec.Http[i].Route[j].Destination.Host, vs.Namespace) {
+				vs.Spec.Http[i].Route[j].Destination.Subset = subset
+			}
+		}
+	}
 }

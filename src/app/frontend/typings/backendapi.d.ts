@@ -401,6 +401,7 @@ export interface Destination extends Resource {
   errors: K8sError[];
   version: string;
   selector: object;
+  host: string;
   subset: string;
 }
 

@@ -42,8 +42,8 @@ func TestTakeOver(t *testing.T) {
 					Route: []*v1alpha3.DestinationWeight{
 						{
 							Destination: &v1alpha3.Destination{
-								Host:   "test.wall",
-								Subset: "v1",
+								Host:   "test",
+								Subset: "v3",
 								Port: &v1alpha3.PortSelector{
 									Number: 8080,
 								},
@@ -57,6 +57,16 @@ func TestTakeOver(t *testing.T) {
 							},
 							Weight: 100,
 						},
+						{
+							Destination: &v1alpha3.Destination{
+								Host:   "something_else",
+								Subset: "v3",
+								Port: &v1alpha3.PortSelector{
+									Number: 8080,
+								},
+							},
+							Weight: 100,
+						},
 					},
 				},
 			},
@@ -65,7 +75,12 @@ func TestTakeOver(t *testing.T) {
 
 	overrideSubset(&vs, "test", "wall", "v1")
 
-	assert.Equal(t, vs.Spec.Http[0].Route[0].Destination.Host, "test.wall.svc.cluster.local")
+	assert.Equal(t, vs.Spec.Http[0].Route[0].Destination.Host, "test")
 	assert.Equal(t, vs.Spec.Http[0].Route[0].Destination.Subset, "v1")
+
+	assert.Equal(t, vs.Spec.Http[0].Route[1].Destination.Host, "test.wall.svc.cluster.local")
 	assert.Equal(t, vs.Spec.Http[0].Route[1].Destination.Subset, "v1")
+
+	assert.Equal(t, vs.Spec.Http[0].Route[2].Destination.Host, "something_else")
+	assert.Equal(t, vs.Spec.Http[0].Route[2].Destination.Subset, "v3")
 }

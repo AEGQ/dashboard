@@ -18,6 +18,7 @@ import {IstioApp, Service, ServiceList} from '@api/backendapi';
 import {ColumnWhenCondition} from '@api/frontendapi';
 import {StateService} from '@uirouter/core';
 import {Subscription} from 'rxjs/Subscription';
+import * as util from 'util';
 
 import {ActionbarService, ResourceMeta} from '../../../../common/services/global/actionbar';
 import {GlobalServicesModule} from '../../../../common/services/global/module';
@@ -115,6 +116,11 @@ export class IstioAppComponent implements OnInit, OnDestroy {
             const matchNode: ElementRef =
                 new ElementRef(document.getElementById('app-operator-' + i + '-' + j));
             h.route.forEach((r) => {
+              if (this.FQDN(r.destination.host, v.objectMeta.namespace) !==
+                  this.FQDN(this.istioApp.objectMeta.name, this.istioApp.objectMeta.namespace)) {
+                return;
+              }
+
               const subset = r.destination.subset;
               let destinationNode: ElementRef;
               if (subset) {
@@ -139,6 +145,13 @@ export class IstioAppComponent implements OnInit, OnDestroy {
     lines.forEach((e, _) => {
       this.drawLineBetweenTwoElement(e[0], e[1], e[2]);
     });
+  }
+
+  FQDN(name: string, namespace: string): string {
+    if (name.endsWith('.svc.cluster.local')) {
+      return name;
+    }
+    return util.format('%s.%s.svc.cluster.local', name, namespace);
   }
 
   drawLineBetweenTwoElement(start: ElementRef, end: ElementRef, svgName: ElementRef): void {

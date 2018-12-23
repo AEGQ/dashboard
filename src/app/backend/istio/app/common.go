@@ -42,7 +42,6 @@ func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []
 			if appAddr == svcAddr {
 				virtualServices = append(virtualServices, virtualservice.ToVirtualServiceDetail(&vService, nil, nil, nil))
 				matched = true
-				break
 			}
 		}
 
@@ -50,12 +49,13 @@ func getAppVirtualServices(app *api.App, vServices []istioApi.VirtualService) []
 			continue
 		}
 
+	ServiceMatch:
 		for _, http := range vService.Spec.Http {
 			for _, route := range http.Route {
 				svcAddr := virtualservice.FQDN(route.Destination.Host, vService.Namespace)
 				if appAddr == svcAddr {
 					virtualServices = append(virtualServices, virtualservice.ToVirtualServiceDetail(&vService, nil, nil, nil))
-					break
+					break ServiceMatch
 				}
 			}
 		}

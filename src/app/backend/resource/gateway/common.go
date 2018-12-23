@@ -16,19 +16,36 @@ package gateway
 
 import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
 	"github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istioApi "github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
+	v1 "k8s.io/api/core/v1"
 )
 
 type GatewayCell istioApi.Gateway
 
 func ToGateway(g *v1alpha3.Gateway) *Gateway {
+	endpoints := make([]*common.Endpoint, 0)
+	for _, s := range g.Spec.Servers {
+		for _, h := range s.Hosts {
+			endpoints = append(endpoints, &common.Endpoint{
+				Host: h,
+				Ports: []common.ServicePort{
+					{
+						Port:     int32(s.Port.Number),
+						Protocol: v1.Protocol(s.Port.Protocol),
+					},
+				},
+			})
+		}
+	}
 	return &Gateway{
 		ObjectMeta: api.NewObjectMeta(g.ObjectMeta),
 		TypeMeta:   api.NewTypeMeta(api.ResourceKindGateway),
 		Servers:    g.Spec.Servers,
 		Selector:   g.Spec.Selector,
+		Endpoints:  endpoints,
 	}
 }
 

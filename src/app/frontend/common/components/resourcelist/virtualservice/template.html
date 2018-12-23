@@ -76,16 +76,28 @@ limitations under the License.
       <ng-container matColumnDef="hosts">
         <mat-header-cell *matHeaderCellDef>Hosts</mat-header-cell>
         <mat-cell *matCellDef="let virtualService">
-          <mat-list role="list">
-            <mat-list-item role="listitem"
-                           *ngFor="let host of virtualService.hosts">
-              <a href="http://{{host}}"
-                 target="_blank">
-                {{host}}
-                <mat-icon class="kd-endpoint-icon">open_in_new</mat-icon>
-              </a>
-            </mat-list-item>
-          </mat-list>
+          <div>
+            <ng-container *ngFor="let host of virtualService.hosts">
+              <div class="kd-internal-endpoint">{{host}}</div>
+            </ng-container>
+          </div>
+          <div *ngIf="!virtualService?.hosts?.length">
+            -
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="gateways">
+        <mat-header-cell *matHeaderCellDef>Gateways</mat-header-cell>
+        <mat-cell *matCellDef="let virtualService">
+          <div>
+            <ng-container *ngFor="let gateway of virtualService?.gateways">
+              <div class="kd-internal-endpoint">{{gateway}}</div>
+            </ng-container>
+          </div>
+          <div *ngIf="!virtualService?.gateways?.length">
+            -
+          </div>
         </mat-cell>
       </ng-container>
 

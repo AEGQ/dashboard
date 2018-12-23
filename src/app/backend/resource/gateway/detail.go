@@ -16,6 +16,7 @@ package gateway
 
 import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	istioApi "github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
 	istio "github.com/wallstreetcn/istio-k8s/client/clientset/versioned"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,7 +33,8 @@ type Gateway struct {
 	// The scope of label search is platform dependent.
 	// On Kubernetes, for example, the scope includes pods running in
 	// all reachable namespaces.
-	Selector map[string]string `json:"selector,omitempty"`
+	Selector  map[string]string  `json:"selector,omitempty"`
+	Endpoints []*common.Endpoint `json:"endpoints"`
 }
 
 type Server struct {

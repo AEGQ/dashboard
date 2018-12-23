@@ -76,7 +76,7 @@ export class VirtualServiceListComponent extends
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'labels', 'hosts', 'age'];
+    return ['statusicon', 'name', 'labels', 'hosts', 'gateways', 'age'];
   }
 
   hasErrors(statefulSet: VirtualService): boolean {

@@ -76,17 +76,7 @@ limitations under the License.
       <ng-container matColumnDef="hosts">
         <mat-header-cell *matHeaderCellDef>Hosts</mat-header-cell>
         <mat-cell *matCellDef="let gateway">
-          <mat-list role="list">
-            <mat-list-item role="listitem"
-                           *ngFor="let server of gateway.servers">
-              <a href="{{server.port.protocol}}://{{host}}:{{server.port.number}}"
-                 target="_blank"
-                 *ngFor="let host of server.hosts">
-                {{host}}:{{server.port.number}}
-                <mat-icon class="kd-endpoint-icon">open_in_new</mat-icon>
-              </a>
-            </mat-list-item>
-          </mat-list>
+          <kd-external-endpoint [endpoints]="gateway.endpoints"></kd-external-endpoint>
         </mat-cell>
       </ng-container>
 

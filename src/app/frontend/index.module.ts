@@ -40,9 +40,14 @@ import {configMapFutureState} from './resource/config/configmap/state';
 import {persistentVolumeClaimFutureState} from './resource/config/persistentvolumeclaim/state';
 import {secretFutureState} from './resource/config/secret/state';
 import {configFutureState} from './resource/config/state';
+import {destinationRuleFutureState} from './resource/discovery/destinationRule/state';
+import {gatewayFutureState} from './resource/discovery/gateway/state';
 import {ingressFutureState} from './resource/discovery/ingress/state';
 import {serviceFutureState} from './resource/discovery/service/state';
 import {discoveryFutureState} from './resource/discovery/state';
+import {virtualServiceFutureState} from './resource/discovery/virtualService/state';
+import {istioAppFutureState} from './resource/istio/istioApp/state';
+import {istioIngressFutureState} from './resource/istio/istioIngresses/state';
 import {cronJobFutureState} from './resource/workloads/cronjob/state';
 import {daemonSetFutureState} from './resource/workloads/daemonset/state';
 import {deploymentFutureState} from './resource/workloads/deployment/state';
@@ -92,6 +97,11 @@ import {shellFutureState} from './shell/state';
         discoveryFutureState,
         ingressFutureState,
         serviceFutureState,
+        virtualServiceFutureState,
+        gatewayFutureState,
+        destinationRuleFutureState,
+        istioAppFutureState,
+        istioIngressFutureState,
         // Config section
         configFutureState,
         configMapFutureState,

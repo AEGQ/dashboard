@@ -13,22 +13,44 @@
 // limitations under the License.
 
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {EventEmitter, Injectable} from '@angular/core';
+import {EventEmitter, Inject, Injectable} from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material';
 import {ObjectMeta, TypeMeta} from '@api/backendapi';
 
+import {Config, CONFIG_DI_TOKEN} from '../../../index.config';
 import {AlertDialog, AlertDialogConfig} from '../../dialogs/alert/dialog';
 import {DeleteResourceDialog} from '../../dialogs/deleteresource/dialog';
+import {DeploymentDialog} from '../../dialogs/deployment/dialog';
 import {EditResourceDialog} from '../../dialogs/editresource/dialog';
+import {IstioItDialog} from '../../dialogs/istio/dialog';
+import {OfflineResourceDialog} from '../../dialogs/offlineresource/dialog';
+import {RedeployResourceDialog} from '../../dialogs/redeployresource/dialog';
+import {ScaleResourceDialog} from '../../dialogs/scaleresource/dialog';
+import {TakeOverDialog} from '../../dialogs/takeOver/dialog';
+import {IstioResource} from '../../resources/istioresource';
 import {RawResource} from '../../resources/rawresource';
+
 import {ResourceMeta} from './actionbar';
+import {CsrfTokenService} from './csrftoken';
 
 @Injectable()
 export class VerberService {
   onDelete = new EventEmitter<boolean>();
+  onIstioDelete = new EventEmitter<boolean>();
   onEdit = new EventEmitter<boolean>();
+  onRedeploy = new EventEmitter<boolean>();
+  onDeployment = new EventEmitter<boolean>();
+  onOffline = new EventEmitter<boolean>();
+  onTakeOver = new EventEmitter<boolean>();
+  onIstioIt = new EventEmitter<boolean>();
+  onScale = new EventEmitter<boolean>();
 
-  constructor(private readonly dialog_: MatDialog, private readonly http_: HttpClient) {}
+  constructor(
+      private readonly dialog_: MatDialog,
+      private readonly http_: HttpClient,
+      private readonly csrfToken_: CsrfTokenService,
+      @Inject(CONFIG_DI_TOKEN) private readonly CONFIG: Config,
+  ) {}
 
   showDeleteDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
@@ -42,6 +64,49 @@ export class VerberService {
     });
   }
 
+  showOffLineDialog(version: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(version, typeMeta, objectMeta);
+    this.dialog_.open(OfflineResourceDialog, dialogConfig)
+        .afterClosed()
+        .subscribe(async (doOffline) => {
+          if (doOffline) {
+            const url = IstioResource.getUrl(typeMeta, objectMeta);
+            const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
+            this.http_.delete(url + `/${version}`, {headers: {[this.CONFIG.csrfHeaderName]: token}})
+                .subscribe(() => {
+                  this.onOffline.emit(true);
+                }, this.handleErrorResponse_.bind(this));
+          }
+        });
+  }
+
+  showIstioDeleteDialog(typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_('', typeMeta, objectMeta);
+    this.dialog_.open(DeleteResourceDialog, dialogConfig)
+        .afterClosed()
+        .subscribe(async (doDelete) => {
+          if (doDelete) {
+            const url = IstioResource.getUrl(typeMeta, objectMeta);
+            this.http_.delete(url).subscribe(() => {
+              this.onIstioDelete.emit(true);
+            }, this.handleErrorResponse_.bind(this));
+          }
+        });
+  }
+
+  showTakeOverDialog(version: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(version, typeMeta, objectMeta);
+    this.dialog_.open(TakeOverDialog, dialogConfig).afterClosed().subscribe(async (doOffline) => {
+      if (doOffline) {
+        const url = IstioResource.getUrl(typeMeta, objectMeta) + `/${version}/takeover`;
+        const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
+        this.http_.post(url, {}, {headers: {[this.CONFIG.csrfHeaderName]: token}}).subscribe(() => {
+          this.onTakeOver.emit(true);
+        }, this.handleErrorResponse_.bind(this));
+      }
+    });
+  }
+
   showEditDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     this.dialog_.open(EditResourceDialog, dialogConfig).afterClosed().subscribe((result) => {
@@ -50,6 +115,70 @@ export class VerberService {
         this.http_.put(url, JSON.parse(result), {headers: this.getHttpHeaders_()}).subscribe(() => {
           this.onEdit.emit(true);
         }, this.handleErrorResponse_.bind(this));
+      }
+    });
+  }
+
+  showDeploymentDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(DeploymentDialog, dialogConfig).afterClosed().subscribe(async (result) => {
+      if (result) {
+        const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
+        const url = IstioResource.getUrl(typeMeta, objectMeta) + `/canary`;
+        result = JSON.parse(result);
+        result.podTemplate = JSON.parse(result.podTemplateJSON);
+        this.http_.post(url, result, {headers: {[this.CONFIG.csrfHeaderName]: token}})
+            .subscribe(() => {
+              this.onDeployment.emit(true);
+            }, this.handleErrorResponse_.bind(this));
+      }
+    });
+  }
+
+  showRedeployDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(RedeployResourceDialog, dialogConfig)
+        .afterClosed()
+        .subscribe(async (result) => {
+          if (result) {
+            const url = `api/v1/deployment/${objectMeta.namespace}/${objectMeta.name}/redeploy`;
+            this.http_
+                .put(url, JSON.parse(result), {headers: {['Content-Type']: 'application/json'}})
+                .subscribe(() => {
+                  this.onRedeploy.emit(true);
+                }, this.handleErrorResponse_.bind(this));
+          }
+        });
+  }
+
+  showIstioItDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(IstioItDialog, dialogConfig).afterClosed().subscribe(async (result) => {
+      if (result) {
+        const {token} = await this.csrfToken_.getTokenForAction('istio').toPromise();
+        const url = IstioResource.getUrl(typeMeta, objectMeta) + `/istio-it`;
+        this.http_.post(url, result, {headers: {[this.CONFIG.csrfHeaderName]: token}})
+            .subscribe(() => {
+              this.onDeployment.emit(true);
+            }, this.handleErrorResponse_.bind(this));
+      }
+    });
+  }
+
+  showScaleDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(ScaleResourceDialog, dialogConfig).afterClosed().subscribe((result) => {
+      if (Number.isInteger(result)) {
+        const url = `api/v1/scale/${typeMeta.kind}/${objectMeta.namespace}/${objectMeta.name}/`;
+        this.http_
+            .put(url, result, {
+              params: {
+                'scaleBy': result,
+              }
+            })
+            .subscribe(() => {
+              this.onScale.emit(true);
+            }, this.handleErrorResponse_.bind(this));
       }
     });
   }

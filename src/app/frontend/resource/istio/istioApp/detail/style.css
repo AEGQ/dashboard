@@ -1,0 +1,59 @@
+.flow-control {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    position: relative;
+    height: 250px;
+}
+
+.flow-control>div{
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 15%;
+    border-radius: 4px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    color: #fff;
+}
+.flow-control>div>div{
+    border-radius: 4px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    display: flex;
+    background: grey;
+    flex-direction: column;
+}
+
+.flow-control>svg{
+    width: 20%;
+    flex-grow: 2;
+    height: 100%;
+}
+
+.flow-control .app-name>div {
+    background: #9fc1e2;
+}
+
+.flow-control .protocol>div{
+    background: #555;
+}
+
+.flow-control .match-rule {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 40px;
+}
+.flow-control .match-rule>div{
+    height: 40px;
+    border-radius: 50%;
+    line-height: 40px;
+  background: orange;
+}
+.flow-control div .destination-wrapper {
+    background:  #9dc184;
+}

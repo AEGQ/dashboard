@@ -35,8 +35,13 @@ export enum Resource {
   ingress = 'ingress',
   service = 'service',
   event = 'event',
+  virtualservice = 'virtualservice',
   container = 'container',
   shell = 'shell',
+  gateway = 'gateway',
+  destinationRule = 'destinationrule',
+  istioApp = 'istio/app',
+  istioIngress = 'istio/ingress'
 }
 
 class ResourceEndpoint {

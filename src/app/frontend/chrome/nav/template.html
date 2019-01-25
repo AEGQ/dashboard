@@ -55,6 +55,21 @@ limitations under the License.
       </kd-nav-item>
 
       <kd-nav-item class="kd-nav-group-item"
+                   [state]="states.istio"
+                   i18n>Istio
+      </kd-nav-item>
+
+      <kd-nav-item class="kd-nav-item"
+                   [state]="states.istioApp"
+                   i18n>Apps
+      </kd-nav-item>
+
+      <kd-nav-item class="kd-nav-item"
+                   [state]="states.istioIngresses"
+                   i18n>Ingresses
+      </kd-nav-item>
+
+      <kd-nav-item class="kd-nav-group-item"
                    [state]="states.workloads"
                    i18n>Workloads
       </kd-nav-item>
@@ -102,6 +117,20 @@ limitations under the License.
       <kd-nav-item class="kd-nav-item"
                    [state]="states.service"
                    i18n>Services
+      </kd-nav-item>
+      <kd-nav-item class="kd-nav-item"
+                   [state]="states.virtualService"
+                   i18n>Virtual Services
+      </kd-nav-item>
+
+      <kd-nav-item class="kd-nav-item"
+                   [state]="states.gateway"
+                   i18n>Gateways
+      </kd-nav-item>
+
+      <kd-nav-item class="kd-nav-item"
+                   [state]="states.destinationRule"
+                   i18n>Destination Rules
       </kd-nav-item>
 
       <kd-nav-item class="kd-nav-group-item"

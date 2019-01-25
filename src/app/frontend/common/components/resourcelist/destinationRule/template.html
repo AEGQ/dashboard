@@ -1,0 +1,116 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<kd-card role="table">
+  <div title
+       fxLayout="row">Destination Rules</div>
+  <div description><span class="kd-muted-light">Items:&nbsp;</span>{{totalItems}}</div>
+  <div actions>
+    <kd-card-list-filter></kd-card-list-filter>
+  </div>
+
+  <div content
+       [hidden]="showZeroState()">
+    <div kdLoadingSpinner
+         [isLoading]="isLoading"></div>
+
+    <mat-table [dataSource]="getData()"
+               matSort
+               matSortActive="age"
+               matSortDisableClear
+               matSortDirection="asc">
+      <ng-container matColumnDef="statusicon">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule; let index=index">
+          <mat-icon [ngClass]="getStatus(destinationRule).iconClass">
+            <ng-container *ngIf="showHoverIcon(index, destinationRule); else showStatus">
+              remove_red_eye
+            </ng-container>
+
+            <ng-template #showStatus>
+              {{getStatus(destinationRule).iconName}}
+            </ng-template>
+          </mat-icon>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header
+                         disableClear="true">Name</mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule">
+          <a (click)="$event.stopPropagation()"
+             [href]="getDetailsHref(destinationRule.objectMeta.name, destinationRule.objectMeta.namespace)">
+            {{destinationRule.objectMeta.name}}
+          </a>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container *ngIf="shouldShowColumn('namespace')"
+                    matColumnDef="namespace">
+        <mat-header-cell *matHeaderCellDef>Namespace</mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule">{{destinationRule.objectMeta.namespace}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="labels">
+        <mat-header-cell *matHeaderCellDef>Labels</mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule">
+          <kd-chips [map]="destinationRule?.objectMeta.labels"
+                    minChipsVisible="4"></kd-chips>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="hosts">
+        <mat-header-cell *matHeaderCellDef>Host</mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule">{{destinationRule.host}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="age">
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header
+                         disableClear="true">Age</mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule">{{destinationRule.objectMeta.creationTimestamp | kdRelativeTime}}</mat-cell>
+      </ng-container>
+
+      <ng-container *ngFor="let col of getActionColumns()"
+                    [matColumnDef]="col.name">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let destinationRule">
+          <kd-dynamic-cell [component]="col.component"
+                           [resource]="destinationRule"></kd-dynamic-cell>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="getColumns()"></mat-header-row>
+      <mat-row #matrow
+               (mouseover)="onRowOver(index)"
+               (mouseleave)="onRowLeave()"
+               (click)="expand(index, row)"
+               [ngClass]="{'kd-no-bottom-border': isRowExpanded(index), 'kd-clickable': hasErrors(row)}"
+               *matRowDef="let row; columns: getColumns(); let index=index"></mat-row>
+    </mat-table>
+
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="itemsPerPage"
+                   [hidePageSize]="true"
+                   [showFirstLastButtons]="true"></mat-paginator>
+  </div>
+
+  <div content
+       [hidden]="!showZeroState()">
+    <kd-list-zero-state></kd-list-zero-state>
+  </div>
+</kd-card>

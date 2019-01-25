@@ -28,9 +28,15 @@ import {configMapListState} from '../../resource/config/configmap/list/state';
 import {persistentVolumeClaimListState} from '../../resource/config/persistentvolumeclaim/list/state';
 import {secretListState} from '../../resource/config/secret/list/state';
 import {configState} from '../../resource/config/state';
+import {destinationRuleListState} from '../../resource/discovery/destinationRule/list/state';
+import {gatewayListState} from '../../resource/discovery/gateway/list/state';
 import {ingressListState} from '../../resource/discovery/ingress/list/state';
 import {serviceListState} from '../../resource/discovery/service/list/state';
 import {discoveryState} from '../../resource/discovery/state';
+import {virtualServiceListState} from '../../resource/discovery/virtualService/list/state';
+import {istioAppListState} from '../../resource/istio/istioApp/list/state';
+import {istioIngressListState} from '../../resource/istio/istioIngresses/list/state';
+import {istioState} from '../../resource/istio/state';
 import {cronJobListState} from '../../resource/workloads/cronjob/list/state';
 import {daemonSetListState} from '../../resource/workloads/daemonset/list/state';
 import {deploymentListState} from '../../resource/workloads/deployment/list/state';
@@ -59,6 +65,10 @@ export class NavComponent implements AfterContentInit, OnInit {
 
     overview: overviewState.name,
 
+    istio: istioState.name,
+    istioApp: istioAppListState.name,
+    istioIngresses: istioIngressListState.name,
+
     workloads: workloadsState.name,
     cronJob: cronJobListState.name,
     daemonSet: daemonSetListState.name,
@@ -72,6 +82,9 @@ export class NavComponent implements AfterContentInit, OnInit {
     discovery: discoveryState.name,
     ingress: ingressListState.name,
     service: serviceListState.name,
+    virtualService: virtualServiceListState.name,
+    gateway: gatewayListState.name,
+    destinationRule: destinationRuleListState.name,
 
     config: configState.name,
     configMap: configMapListState.name,

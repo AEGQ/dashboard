@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/kubernetes/dashboard/src/app/backend/errors"
@@ -39,6 +40,7 @@ import (
 const (
 	// DescriptionAnnotationKey is annotation key for a description.
 	DescriptionAnnotationKey = "description"
+	ReDeployCountKey         = "deployment.redeploy.count"
 )
 
 // AppDeploymentSpec is a specification for an app deployment.
@@ -368,4 +370,32 @@ func DeployAppFromFile(cfg *rest.Config, spec *AppDeploymentFromFileSpec) (bool,
 			return false, errors.LocalizeError(err)
 		}
 	}
+}
+
+func Redeploy(client client.Interface, namespace, deploymentName string) error {
+	dp, err := client.AppsV1().Deployments(namespace).Get(deploymentName, metaV1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	if val, ok := dp.Spec.Template.Annotations[ReDeployCountKey]; ok {
+		dp.Spec.Template.Annotations[ReDeployCountKey] = reDeployCounter(val)
+	} else {
+		dp.Spec.Template.Annotations = map[string]string{ReDeployCountKey: "1"}
+	}
+
+	_, err = client.AppsV1().Deployments(namespace).Update(dp)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func reDeployCounter(val string) string {
+	now, err := strconv.Atoi(val)
+	if err != nil {
+		return val
+	}
+	return fmt.Sprintf("%d", (now + int(1)))
 }

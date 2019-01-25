@@ -1,0 +1,62 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<kd-object-meta [initialized]="isInitialized"
+                [objectMeta]="gateway?.objectMeta"></kd-object-meta>
+
+<kd-card [initialized]="isInitialized">
+  <div title>Gateway Information</div>
+
+  <div content
+       fxLayout="row wrap">
+    <kd-property>
+      <div key>Selector</div>
+      <div value
+           *ngIf="gateway?.selector">
+        <kd-chips [map]="gateway?.selector"></kd-chips>
+      </div>
+    </kd-property>
+  </div>
+</kd-card>
+
+<kd-card>
+  <div title>Servers</div>
+  <div content>
+    <mat-list>
+      <mat-list-item style="height: auto;"
+                     *ngFor="let server of gateway?.servers">
+        <kd-property>
+          <div key>Host</div>
+
+          <div value>
+            <kd-chips [map]="server?.hosts"
+                      minChipsVisible="4"></kd-chips>
+          </div>
+        </kd-property>
+        <kd-property>
+          <div key>Port(Name,Port,Protocol)</div>
+          <div value
+               style="font-size:14px;"> {{server.port.name}}, {{server.port.number}}, {{server.port.protocol}} </div>
+        </kd-property>
+        <kd-property>
+          <div key>TLS Mode</div>
+          <div value
+               style="font-size:14px;"> {{server?.tls?.mode || 'NONE'}} </div>
+        </kd-property>
+      </mat-list-item>
+    </mat-list>
+  </div>
+</kd-card>

@@ -19,8 +19,7 @@ limitations under the License.
     <mat-chip *ngIf="isVisible(i)">
 
       <ng-container *ngIf="isTooLong(map[key])">
-        <a href
-           (click)="openChipDialog(key, map[key])">{{key}}</a>
+        <a (click)="openChipDialog(key, map[key])">{{key}}</a>
       </ng-container>
 
       <ng-container *ngIf="!isTooLong(map[key])">

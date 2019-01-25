@@ -19,8 +19,14 @@ import {ComponentsModule} from '../components/module';
 
 import {AlertDialog} from './alert/dialog';
 import {DeleteResourceDialog} from './deleteresource/dialog';
+import {DeploymentDialog} from './deployment/dialog';
 import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
+import {IstioItDialog} from './istio/dialog';
+import {OfflineResourceDialog} from './offlineresource/dialog';
+import {RedeployResourceDialog} from './redeployresource/dialog';
+import {ScaleResourceDialog} from './scaleresource/dialog';
+import {TakeOverDialog} from './takeOver/dialog';
 
 @NgModule({
   imports: [
@@ -31,19 +37,37 @@ import {EditResourceDialog} from './editresource/dialog';
     AlertDialog,
     EditResourceDialog,
     DeleteResourceDialog,
+    RedeployResourceDialog,
     LogsDownloadDialog,
+    DeploymentDialog,
+    IstioItDialog,
+    TakeOverDialog,
+    OfflineResourceDialog,
+    ScaleResourceDialog,
   ],
   exports: [
     AlertDialog,
     EditResourceDialog,
     DeleteResourceDialog,
+    RedeployResourceDialog,
     LogsDownloadDialog,
+    DeploymentDialog,
+    IstioItDialog,
+    TakeOverDialog,
+    OfflineResourceDialog,
+    ScaleResourceDialog,
   ],
   entryComponents: [
     AlertDialog,
     EditResourceDialog,
     DeleteResourceDialog,
+    RedeployResourceDialog,
     LogsDownloadDialog,
+    DeploymentDialog,
+    IstioItDialog,
+    TakeOverDialog,
+    OfflineResourceDialog,
+    ScaleResourceDialog,
   ]
 })
 export class DialogsModule {

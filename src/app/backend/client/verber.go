@@ -19,7 +19,7 @@ import (
 
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	restclient "k8s.io/client-go/rest"
 )
@@ -35,6 +35,7 @@ type resourceVerber struct {
 	autoscalingClient RESTClient
 	storageClient     RESTClient
 	rbacClient        RESTClient
+	istioClient       RESTClient
 }
 
 func (verber *resourceVerber) getRESTClientByType(clientType api.ClientType) RESTClient {
@@ -53,6 +54,8 @@ func (verber *resourceVerber) getRESTClientByType(clientType api.ClientType) RES
 		return verber.storageClient
 	case api.ClientTypeRbacClient:
 		return verber.rbacClient
+	case api.ClientTypeIstioVerberClient:
+		return verber.istioClient
 	default:
 		return verber.client
 	}
@@ -68,9 +71,9 @@ type RESTClient interface {
 // NewResourceVerber creates a new resource verber that uses the given client for performing operations.
 func NewResourceVerber(client, extensionsClient, appsClient,
 	batchClient, betaBatchClient, autoscalingClient, storageClient,
-	rbacClient RESTClient) clientapi.ResourceVerber {
+	rbacClient, istioClient RESTClient) clientapi.ResourceVerber {
 	return &resourceVerber{client, extensionsClient, appsClient,
-		batchClient, betaBatchClient, autoscalingClient, storageClient, rbacClient}
+		batchClient, betaBatchClient, autoscalingClient, storageClient, rbacClient, istioClient}
 }
 
 // Delete deletes the resource of the given kind in the given namespace with the given name.

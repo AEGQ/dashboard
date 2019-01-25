@@ -1,0 +1,148 @@
+<!--
+Copyright 2017 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<kd-object-meta [initialized]="isInitialized"
+                [objectMeta]="istioApp.objectMeta"></kd-object-meta>
+
+<kd-card [initialized]="isInitialized">
+  <div title>Flow Control</div>
+  <div content>
+    <mat-tab-group>
+      <mat-tab label="Graph View">
+        <div class="flow-control">
+          <div class="app-name"
+               #c1>
+            <ng-container *ngFor="let virtualService of istioApp.virtualServices; let i = index">
+              <div *ngFor="let host of virtualService.hosts; let j = index"
+                   matTooltip="{{host}}"
+                   id="app-host-{{i}}-{{j}}">
+                {{host}}
+              </div>
+              <div *ngFor="let gateway of virtualService.gateways; let j = index"
+                   matTooltip="{{gateway}}"
+                   id="app-gateway-{{i}}-{{j}}">
+                {{gateway}}
+              </div>
+            </ng-container>
+          </div>
+
+          <svg #link1>
+            <defs>
+              <marker id="arrow"
+                      markerWidth="9"
+                      markerHeight="6"
+                      refX="0"
+                      refY="3"
+                      orient="auto"
+                      markerUnits="strokeWidth"
+                      viewBox="0 0 15 15">
+                <path d="M0,0 L0,6 L9,3 z"
+                      fill="#9fc1e2" />
+              </marker>
+            </defs>
+          </svg>
+
+          <div #c2
+               class="protocol">
+            <div #http>HTTP</div>
+            <div #tcp>TCP</div>
+            <div #tls>TLS</div>
+          </div>
+
+          <svg #link2> </svg>
+
+          <div #c3
+               class="match-rule">
+            <ng-container *ngFor="let virtualService of istioApp.virtualServices; let i = index">
+              <div *ngFor="let http of virtualService.http; let j = index"
+                   class="circle"
+                   type="match"
+                   id="app-operator-{{i}}-{{j}}">M</div>
+            </ng-container>
+          </div>
+
+          <ng-template #defaultService>
+            <div>
+              <div class="match-rule"
+                   #matchRule>Default Service</div>
+            </div>
+          </ng-template>
+
+          <svg #link3></svg>
+
+          <div #c4>
+            <div class="destination-wrapper"
+                 id="app-any-destination"
+                 style="background: #3a5b5d;">Any</div>
+            <ng-container *ngFor="let destination of istioApp.destinations">
+              <div class="destination-wrapper"
+                   id="app-destination-{{destination?.version}}"
+                   [matMenuTriggerFor]="canaryMenu">{{destination?.version}}</div>
+
+              <mat-menu #canaryMenu="matMenu">
+                <button mat-menu-item
+                        (click)="onTakeOver(destination.version)">Take Over</button>
+                <button mat-menu-item
+                        (click)="onOffline(destination.version)">Offline</button>
+              </mat-menu>
+            </ng-container>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Code">
+        <mat-table [dataSource]="istioApp?.virtualServices"
+                   class="kd-table-no-footer">
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+            <mat-cell *matCellDef="let virtualService"> {{virtualService?.objectMeta?.name}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="namespace">
+            <mat-header-cell *matHeaderCellDef> Namespace </mat-header-cell>
+            <mat-cell *matCellDef="let virtualService"> {{virtualService?.objectMeta?.namespace}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="action">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let virtualService">
+              <kd-resource-context-menu [objectMeta]="virtualService?.objectMeta"
+                                        [typeMeta]="virtualService?.typeMeta"></kd-resource-context-menu>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
+          <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
+        </mat-table>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</kd-card>
+
+
+<kd-card *ngIf="istioApp.metrics">
+
+  <div title>Metrics</div>
+  <div content
+       *ngIf="isInitialized">
+
+    <iframe *ngFor="let metric of metrics"
+            [src]="metric"
+            width="50%"
+            height="300"
+            frameborder="0">
+    </iframe>
+  </div>
+</kd-card>

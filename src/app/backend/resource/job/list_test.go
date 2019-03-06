@@ -126,15 +126,30 @@ func TestGetJobListFromChannels(t *testing.T) {
 					{
 						ObjectMeta: metaV1.ObjectMeta{
 							Namespace: "rs-namespace",
+							Labels:    map[string]string{"foo": "bar"},
 							OwnerReferences: []metaV1.OwnerReference{
 								{
-									Name:       "rs-name",
+									Name:       "rs-name-failed-pod",
 									UID:        "uid",
 									Controller: &controller,
 								},
 							},
 						},
 						Status: v1.PodStatus{Phase: v1.PodFailed},
+					},
+					{
+						ObjectMeta: metaV1.ObjectMeta{
+							Namespace: "rs-namespace",
+							Labels:    map[string]string{"foo": "bar"},
+							OwnerReferences: []metaV1.OwnerReference{
+								{
+									Name:       "rs-name-running-pod",
+									UID:        "uid",
+									Controller: &controller,
+								},
+							},
+						},
+						Status: v1.PodStatus{Phase: v1.PodRunning},
 					},
 					{
 						ObjectMeta: metaV1.ObjectMeta{
@@ -154,7 +169,7 @@ func TestGetJobListFromChannels(t *testing.T) {
 			&JobList{
 				ListMeta:          api.ListMeta{TotalItems: 2},
 				CumulativeMetrics: make([]metricapi.Metric, 0),
-				Status:            common.ResourceStatus{Succeeded: 2},
+				Status:            common.ResourceStatus{Running: 1, Failed: 1},
 				Jobs: []Job{{
 					ObjectMeta: api.ObjectMeta{
 						Name:              "rs-name",
@@ -166,8 +181,9 @@ func TestGetJobListFromChannels(t *testing.T) {
 					TypeMeta: api.TypeMeta{Kind: api.ResourceKindJob},
 					Pods: common.PodInfo{
 						Current:  7,
+						Running:  1,
 						Desired:  &completions,
-						Failed:   2,
+						Failed:   1,
 						Warnings: []common.Event{},
 					},
 					JobStatus: JobStatus{
@@ -184,8 +200,9 @@ func TestGetJobListFromChannels(t *testing.T) {
 					TypeMeta: api.TypeMeta{Kind: api.ResourceKindJob},
 					Pods: common.PodInfo{
 						Current:  7,
+						Running:  1,
 						Desired:  &completions,
-						Failed:   2,
+						Failed:   1,
 						Warnings: []common.Event{},
 					},
 					JobStatus: JobStatus{

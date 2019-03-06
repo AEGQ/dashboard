@@ -50,7 +50,6 @@ module.exports = function(config) {
 
     coverageIstanbulReporter: {
       dir: path.join(__dirname, '..', 'coverage'),
-      dir: require('path').join(__dirname, 'coverage'),
       reports: ['html', 'lcovonly'],
       'report-config': {
         html: {subdir: 'html'},
@@ -87,6 +86,22 @@ module.exports = function(config) {
       FirefoxHeadless: {
         base: 'Firefox',
         flags: ['-headless'],
+      },
+    };
+  }
+
+  // Use custom browser configuration when running on container.
+  if (!!process.env.K8S_DASHBOARD_CONTAINER) {
+    configuration.browsers = ['ChromeHeadless'];
+    configuration.customLaunchers = {
+      ChromeHeadless: {
+        base: 'Chrome',
+        flags: [
+          '--disable-gpu',
+          '--headless',
+          '--no-sandbox',
+          '--remote-debugging-port=9222',
+        ],
       },
     };
   }

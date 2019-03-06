@@ -42,6 +42,7 @@ type holder struct {
 	systemBanner         string
 	systemBannerSeverity string
 	apiLogLevel          string
+	namespace            string
 
 	authenticationMode []string
 
@@ -49,7 +50,7 @@ type holder struct {
 	enableInsecureLogin       bool
 	disableSettingsAuthorizer bool
 
-	disableSkipButton bool
+	enableSkipLogin bool
 }
 
 // GetInsecurePort 'insecure-port' argument of Dashboard binary.
@@ -155,7 +156,12 @@ func (self *holder) GetDisableSettingsAuthorizer() bool {
 	return self.disableSettingsAuthorizer
 }
 
-// GetDisableSettingsAuthorizer 'disable-settings-authorizer' argument of Dashboard binary.
-func (self *holder) GetDisableSkipButton() bool {
-	return self.disableSkipButton
+// GetEnableSkipLogin 'enable-skip-login' argument of Dashboard binary.
+func (self *holder) GetEnableSkipLogin() bool {
+	return self.enableSkipLogin
+}
+
+// GetNamespace 'namespace' argument of Dashboard binary.
+func (self *holder) GetNamespace() string {
+	return self.namespace
 }

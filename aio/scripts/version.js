@@ -10,6 +10,13 @@ const gitInfo = gitDescribeSync({
 });
 
 gitInfo.packageVersion = version;
+Object.assign(gitInfo.semver, {
+  loose: false,
+  options: {
+    includePrerelease: false,
+    loose: false,
+  }
+});
 
 const file =
     resolve(__dirname, '..', '..', 'src/', 'app', 'frontend', 'environments', 'version.ts');

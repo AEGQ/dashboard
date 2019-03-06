@@ -27,6 +27,7 @@ import {OfflineResourceDialog} from './offlineresource/dialog';
 import {RedeployResourceDialog} from './redeployresource/dialog';
 import {ScaleResourceDialog} from './scaleresource/dialog';
 import {TakeOverDialog} from './takeOver/dialog';
+import {TriggerResourceDialog} from './triggerresource/dialog';
 
 @NgModule({
   imports: [
@@ -44,6 +45,7 @@ import {TakeOverDialog} from './takeOver/dialog';
     TakeOverDialog,
     OfflineResourceDialog,
     ScaleResourceDialog,
+    TriggerResourceDialog,
   ],
   exports: [
     AlertDialog,
@@ -56,6 +58,7 @@ import {TakeOverDialog} from './takeOver/dialog';
     TakeOverDialog,
     OfflineResourceDialog,
     ScaleResourceDialog,
+    TriggerResourceDialog,
   ],
   entryComponents: [
     AlertDialog,
@@ -68,6 +71,7 @@ import {TakeOverDialog} from './takeOver/dialog';
     TakeOverDialog,
     OfflineResourceDialog,
     ScaleResourceDialog,
+    TriggerResourceDialog,
   ]
 })
 export class DialogsModule {

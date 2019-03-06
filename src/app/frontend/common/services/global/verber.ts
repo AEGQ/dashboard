@@ -27,6 +27,7 @@ import {OfflineResourceDialog} from '../../dialogs/offlineresource/dialog';
 import {RedeployResourceDialog} from '../../dialogs/redeployresource/dialog';
 import {ScaleResourceDialog} from '../../dialogs/scaleresource/dialog';
 import {TakeOverDialog} from '../../dialogs/takeOver/dialog';
+import {TriggerResourceDialog} from '../../dialogs/triggerresource/dialog';
 import {IstioResource} from '../../resources/istioresource';
 import {RawResource} from '../../resources/rawresource';
 
@@ -44,6 +45,7 @@ export class VerberService {
   onTakeOver = new EventEmitter<boolean>();
   onIstioIt = new EventEmitter<boolean>();
   onScale = new EventEmitter<boolean>();
+  onTrigger = new EventEmitter<boolean>();
 
   constructor(
       private readonly dialog_: MatDialog,
@@ -57,9 +59,8 @@ export class VerberService {
     this.dialog_.open(DeleteResourceDialog, dialogConfig).afterClosed().subscribe((doDelete) => {
       if (doDelete) {
         const url = RawResource.getUrl(typeMeta, objectMeta);
-        this.http_.delete(url).subscribe(() => {
-          this.onDelete.emit(true);
-        }, this.handleErrorResponse_.bind(this));
+        this.http_.delete(url).subscribe(
+            () => this.onDelete.emit(true), this.handleErrorResponse_.bind(this));
       }
     });
   }
@@ -112,9 +113,8 @@ export class VerberService {
     this.dialog_.open(EditResourceDialog, dialogConfig).afterClosed().subscribe((result) => {
       if (result) {
         const url = RawResource.getUrl(typeMeta, objectMeta);
-        this.http_.put(url, JSON.parse(result), {headers: this.getHttpHeaders_()}).subscribe(() => {
-          this.onEdit.emit(true);
-        }, this.handleErrorResponse_.bind(this));
+        this.http_.put(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onEdit.emit(true), this.handleErrorResponse_.bind(this));
       }
     });
   }
@@ -176,9 +176,18 @@ export class VerberService {
                 'scaleBy': result,
               }
             })
-            .subscribe(() => {
-              this.onScale.emit(true);
-            }, this.handleErrorResponse_.bind(this));
+            .subscribe(() => this.onScale.emit(true), this.handleErrorResponse_.bind(this));
+      }
+    });
+  }
+
+  showTriggerDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_.open(TriggerResourceDialog, dialogConfig).afterClosed().subscribe((result) => {
+      if (result) {
+        const url = `api/v1/cronjob/${objectMeta.namespace}/${objectMeta.name}/trigger`;
+        this.http_.put(url, {}).subscribe(
+            () => this.onTrigger.emit(true), this.handleErrorResponse_.bind(this));
       }
     });
   }

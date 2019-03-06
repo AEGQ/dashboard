@@ -357,9 +357,14 @@ export interface Service extends Resource {
 
 export interface DestinationRules extends Resource {
   errors: K8sError[];
-  subsets: Object[];
+  subsets: Subset[];
   host: IstioHost;
   string: string;
+}
+
+export interface Subset {
+  name: string;
+  labels: StringMap;
 }
 
 export interface DestinationRuleList extends ResourceList {
@@ -1103,18 +1108,14 @@ export interface LoginStatus {
   httpsMode: boolean;
 }
 
-export interface TokenRefreshSpec {
-  jweToken: string;
-}
-
-export interface LoginModesResponse {
-  modes: string[];
-}
-
 export type AuthenticationMode = string;
 
 export interface EnabledAuthenticationModes {
   modes: AuthenticationMode[];
+}
+
+export interface LoginSkippableResponse {
+  skippable: boolean;
 }
 
 export interface SystemBanner {
@@ -1141,7 +1142,7 @@ export interface TerminalResponse {
 
 export interface ShellFrame {
   Op: string;
-  Data?: any;
+  Data?: string;
   SessionID?: string;
   Rows?: number;
   Cols?: number;
@@ -1198,7 +1199,10 @@ interface Strategy {
   rollingUpdate: RollingUpdate;
 }
 
-interface Template {metadata: Metadata; spec: string;}
+interface Template {
+  metadata: Metadata;
+  spec: string;
+}
 
 interface Spec {
   progressDeadlineSeconds: number;

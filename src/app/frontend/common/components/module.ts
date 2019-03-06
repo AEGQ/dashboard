@@ -24,12 +24,14 @@ import {ActionbarDetailEditComponent} from './actionbar/detailactions/edit/compo
 import {ActionbarDetailExecComponent} from './actionbar/detailactions/exec/component';
 import {ActionbarDetailLogsComponent} from './actionbar/detailactions/logs/component';
 import {ActionbarDetailScaleComponent} from './actionbar/detailactions/scale/component';
+import {ActionbarDetailTriggerComponent} from './actionbar/detailactions/trigger/component';
 import {DefaultActionbar} from './actionbars/default/component';
 import {IstioAppDetailsActionbar} from './actionbars/istioappdetail/component';
 import {LogsDefaultActionbar} from './actionbars/logsdefault/component';
 import {LogsExecDefaultActionbar} from './actionbars/logsexecdefault/component';
 import {LogsScaleDefaultActionbar} from './actionbars/logsscaledefault/component';
 import {ScaleDefaultActionbar} from './actionbars/scaledefault/component';
+import {TriggerDefaultActionbar} from './actionbars/triggerdefault/component';
 import {AllocationChartComponent} from './allocationchart/component';
 import {BreadcrumbsComponent} from './breadcrumbs/component';
 import {CardComponent} from './card/component';
@@ -47,7 +49,6 @@ import {ResourceLimitListComponent} from './limits/component';
 import {CanaryButtonComponent} from './list/column/canarybutton/component';
 import {ColumnComponent} from './list/column/component';
 import {IstioAppMenuComponent} from './list/column/istioappmenu/component';
-import {LogsButtonComponent} from './list/column/logsbutton/component';
 import {MenuComponent} from './list/column/menu/component';
 import {RedeployButtonComponent} from './list/column/redeploybutton/component';
 import {CardListFilterComponent} from './list/filter/component';
@@ -133,7 +134,6 @@ import {ZeroStateComponent} from './zerostate/component';
     TextInputComponent,
     RowDetailComponent,
     ColumnComponent,
-    LogsButtonComponent,
     MenuComponent,
     CanaryButtonComponent,
     RedeployButtonComponent,
@@ -170,6 +170,8 @@ import {ZeroStateComponent} from './zerostate/component';
     LogsScaleDefaultActionbar,
     LogsExecDefaultActionbar,
     SparklineComponent,
+    ActionbarDetailTriggerComponent,
+    TriggerDefaultActionbar,
   ],
   exports: [
     AllocationChartComponent,
@@ -224,6 +226,7 @@ import {ZeroStateComponent} from './zerostate/component';
     ActionbarDetailLogsComponent,
     ActionbarDetailExecComponent,
     ActionbarDetailCanaryComponent,
+    TriggerDefaultActionbar,
     UploadFileComponent,
     VirtualServiceListComponent,
     DestinationRuleListComponent,
@@ -236,11 +239,11 @@ import {ZeroStateComponent} from './zerostate/component';
     LogsScaleDefaultActionbar,
     LogsExecDefaultActionbar,
     SparklineComponent,
+    ActionbarDetailTriggerComponent,
   ],
   entryComponents: [
     ChipDialog,
     RowDetailComponent,
-    LogsButtonComponent,
     CanaryButtonComponent,
     RedeployButtonComponent,
     IstioAppMenuComponent,

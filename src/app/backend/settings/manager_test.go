@@ -32,7 +32,7 @@ func TestNewSettingsManager(t *testing.T) {
 
 func TestSettingsManager_GetGlobalSettings(t *testing.T) {
 	sm := NewSettingsManager(nil)
-	client := fake.NewSimpleClientset(api.GetDefaultSettingsConfigMap())
+	client := fake.NewSimpleClientset(api.GetDefaultSettingsConfigMap(""))
 	gs := sm.GetGlobalSettings(client)
 
 	if !reflect.DeepEqual(api.GetDefaultSettings(), gs) {
@@ -41,8 +41,8 @@ func TestSettingsManager_GetGlobalSettings(t *testing.T) {
 }
 
 func TestSettingsManager_SaveGlobalSettings(t *testing.T) {
-	client := fake.NewSimpleClientset(api.GetDefaultSettingsConfigMap())
 	sm := NewSettingsManager(nil)
+	client := fake.NewSimpleClientset(api.GetDefaultSettingsConfigMap(""))
 	defaults := api.GetDefaultSettings()
 	err := sm.SaveGlobalSettings(client, &defaults)
 

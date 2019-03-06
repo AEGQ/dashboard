@@ -20,14 +20,16 @@ import (
 	"log"
 	"sync"
 
-	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
-	syncApi "github.com/kubernetes/dashboard/src/app/backend/sync/api"
 	jose "gopkg.in/square/go-jose.v2"
 	v1 "k8s.io/api/core/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
+
+	"github.com/kubernetes/dashboard/src/app/backend/args"
+	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
+	syncApi "github.com/kubernetes/dashboard/src/app/backend/sync/api"
 )
 
 // Entries held by resource used to synchronize encryption key data.
@@ -103,11 +105,13 @@ func (self *rsaKeyHolder) update(obj runtime.Object) {
 }
 
 // Handler function executed by synchronizer used to store encryption key. It is called whenever watched object
-// is gets deleted. It is then recreated based on local key.
+// gets deleted. It is then recreated based on local key.
 func (self *rsaKeyHolder) recreate(obj runtime.Object) {
 	secret := obj.(*v1.Secret)
 	log.Printf("Synchronized secret %s has been deleted. Recreating.", secret.Name)
-	self.synchronizer.Create(self.getEncryptionKeyHolder())
+	if err := self.synchronizer.Create(self.getEncryptionKeyHolder()); err != nil {
+		panic(err)
+	}
 }
 
 func (self *rsaKeyHolder) init() {
@@ -136,7 +140,7 @@ func (self *rsaKeyHolder) getEncryptionKeyHolder() runtime.Object {
 	priv, pub := ExportRSAKeyOrDie(self.Key())
 	return &v1.Secret{
 		ObjectMeta: metaV1.ObjectMeta{
-			Namespace: authApi.EncryptionKeyHolderNamespace,
+			Namespace: args.Holder.GetNamespace(),
 			Name:      authApi.EncryptionKeyHolderName,
 		},
 

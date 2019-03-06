@@ -1158,7 +1158,7 @@ func (apiHandler *APIHandler) handleDeploy(request *restful.Request, response *r
 }
 
 func (apiHandler *APIHandler) handleScaleResource(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+	cfg, err := apiHandler.cManager.Config(request)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return
@@ -1168,7 +1168,7 @@ func (apiHandler *APIHandler) handleScaleResource(request *restful.Request, resp
 	kind := request.PathParameter("kind")
 	name := request.PathParameter("name")
 	count := request.QueryParameter("scaleBy")
-	replicaCountSpec, err := scaling.ScaleResource(k8sClient, kind, namespace, name, count)
+	replicaCountSpec, err := scaling.ScaleResource(cfg, kind, namespace, name, count)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return
@@ -1177,7 +1177,7 @@ func (apiHandler *APIHandler) handleScaleResource(request *restful.Request, resp
 }
 
 func (apiHandler *APIHandler) handleGetReplicaCount(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+	cfg, err := apiHandler.cManager.Config(request)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return
@@ -1186,7 +1186,7 @@ func (apiHandler *APIHandler) handleGetReplicaCount(request *restful.Request, re
 	namespace := request.PathParameter("namespace")
 	kind := request.PathParameter("kind")
 	name := request.PathParameter("name")
-	scaleSpec, err := scaling.GetScaleSpec(k8sClient, kind, namespace, name)
+	scaleSpec, err := scaling.GetScaleSpec(cfg, kind, namespace, name)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return
@@ -1430,11 +1430,11 @@ func (apiHandler *APIHandler) handleExecShell(request *restful.Request, response
 		return
 	}
 
-	terminalSessions[sessionId] = TerminalSession{
+	terminalSessions.Set(sessionId, TerminalSession{
 		id:       sessionId,
 		bound:    make(chan error),
 		sizeChan: make(chan remotecommand.TerminalSize),
-	}
+	})
 	go WaitForTerminal(k8sClient, cfg, request, sessionId)
 	response.WriteHeaderAndEntity(http.StatusOK, TerminalResponse{Id: sessionId})
 }
@@ -2062,7 +2062,8 @@ func (apiHandler *APIHandler) handleGetHorizontalPodAutoscalerList(request *rest
 	}
 
 	namespace := parseNamespacePathParameter(request)
-	result, err := horizontalpodautoscaler.GetHorizontalPodAutoscalerList(k8sClient, namespace)
+	dataSelect := parseDataSelectPathParameter(request)
+	result, err := horizontalpodautoscaler.GetHorizontalPodAutoscalerList(k8sClient, namespace, dataSelect)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return
@@ -2190,8 +2191,7 @@ func (apiHandler *APIHandler) handleGetCronJobDetail(request *restful.Request, r
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
-	result, err := cronjob.GetCronJobDetail(k8sClient, dataSelect, apiHandler.iManager.Metric().Client(), namespace,
-		name)
+	result, err := cronjob.GetCronJobDetail(k8sClient, namespace, name)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return
@@ -2208,8 +2208,13 @@ func (apiHandler *APIHandler) handleGetCronJobJobs(request *restful.Request, res
 
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
+	active := true
+	if request.QueryParameter("active") == "false" {
+		active = false
+	}
+
 	dataSelect := parseDataSelectPathParameter(request)
-	result, err := cronjob.GetCronJobJobs(k8sClient, apiHandler.iManager.Metric().Client(), dataSelect, namespace, name)
+	result, err := cronjob.GetCronJobJobs(k8sClient, apiHandler.iManager.Metric().Client(), dataSelect, namespace, name, active)
 	if err != nil {
 		kdErrors.HandleInternalError(response, err)
 		return

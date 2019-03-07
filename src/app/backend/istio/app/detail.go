@@ -38,9 +38,8 @@ func GetAppDeploySpec(client kubernetes.Interface, namespace *common.NamespaceQu
 
 // GetAppDetail queries the specified application's deploy.
 func GetAppDetail(client kubernetes.Interface, istioClient istio.Interface, nsQuery *common.NamespaceQuery, appName string, dataSelect *dataselect.DataSelectQuery) (*api.App, error) {
-	dRules, err := istioClient.Networking().DestinationRules(nsQuery.ToRequestParam()).List(metaV1.ListOptions{})
-	if err != nil {
-		return nil, err
+	channels := common.ResourceChannels{
+		DestinationRuleList: common.GetDestinationRuleListChannel(istioClient, nsQuery, 1),
 	}
 
 	svc, err := client.CoreV1().Services(nsQuery.ToRequestParam()).Get(appName, metaV1.GetOptions{})
@@ -54,6 +53,12 @@ func GetAppDetail(client kubernetes.Interface, istioClient istio.Interface, nsQu
 	}
 
 	ns, err := namespace.GetNamespaceDetail(client, nsQuery.ToRequestParam())
+	if err != nil {
+		return nil, err
+	}
+
+	dRules := <-channels.DestinationRuleList.List
+	err = <-channels.DestinationRuleList.Error
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +108,7 @@ func getDeploymentByLabels(client kubernetes.Interface, namespace *common.Namesp
 		return nil, err
 	}
 
-	var parentDeps []v1beta1.Deployment
+	var deps []v1beta1.Deployment
 	for _, dep := range deployments.Items {
 		matched := true
 		for key, val := range filterLabels {
@@ -113,8 +118,8 @@ func getDeploymentByLabels(client kubernetes.Interface, namespace *common.Namesp
 			}
 		}
 		if matched {
-			parentDeps = append(parentDeps, dep)
+			deps = append(deps, dep)
 		}
 	}
-	return parentDeps, nil
+	return deps, nil
 }

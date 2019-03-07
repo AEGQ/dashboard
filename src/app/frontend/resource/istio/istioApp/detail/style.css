@@ -55,5 +55,8 @@
   background: orange;
 }
 .flow-control div .destination-wrapper {
-    background:  #9dc184;
+  background:  #FF3030;
+}
+.flow-control div .success-destination {
+  background:  #71C671;
 }

@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Component, ElementRef, OnDestroy, OnInit, QueryList, Renderer2, ViewChild, ViewChildren} from '@angular/core';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {IstioApp, Service, ServiceList} from '@api/backendapi';
+import {IstioApp, RawDeployment, Service, ServiceList} from '@api/backendapi';
 import {ColumnWhenCondition} from '@api/frontendapi';
 import {StateService} from '@uirouter/core';
+import {Observable} from 'rxjs/Rx';
 import {Subscription} from 'rxjs/Subscription';
 import * as util from 'util';
 
@@ -44,6 +46,7 @@ export class IstioAppComponent implements OnInit, OnDestroy {
   @ViewChildren('matchRule') matchRuleDoms!: QueryList<ElementRef>;
 
   private istioAppDetailSubscription_: Subscription;
+  private pollingData: Subscription;
   private istioAppSetName_: string;
   private readonly dynamicColumns_: ColumnWhenCondition[] = [];
   private readonly kdState_: KdStateService;
@@ -54,14 +57,18 @@ export class IstioAppComponent implements OnInit, OnDestroy {
 
   JSON: JSON;
   isInitialized = false;
+  refreshed = false;
 
   constructor(
       private readonly istioApp_: NamespacedResourceService<IstioApp>,
       private readonly actionbar_: ActionbarService, private readonly state_: StateService,
       private readonly notifications_: NotificationsService,
-      private readonly verber_: VerberService, readonly sanitizer: DomSanitizer) {
+      private readonly verber_: VerberService, readonly sanitizer: DomSanitizer,
+      private readonly httpClient: HttpClient, private readonly renderer: Renderer2) {
     this.JSON = JSON;
     this.kdState_ = GlobalServicesModule.injector.get(KdStateService);
+    this.httpClient = httpClient;
+    this.renderer = renderer;
   }
 
   ngOnInit(): void {
@@ -89,8 +96,65 @@ export class IstioAppComponent implements OnInit, OnDestroy {
               this.isInitialized = true;
               setTimeout(() => {
                 this.drawLines();
+                this.refreshState();
               }, 0);
             });
+  }
+
+  // refreshState polling the application's deployments every 5 seconds and change the destinations'
+  // color.
+  refreshState(): void {
+    if (!this.istioApp.objectMeta || this.refreshed) {
+      return;
+    }
+    this.pollingData =
+        Observable.interval(5000)
+            .startWith(100)
+            .switchMap(
+                () => this.httpClient.get(
+                    '/api/v1/istio/app/' + this.istioApp.objectMeta.namespace + '/' +
+                    this.istioApp.objectMeta.name + '/deployments'))
+            .subscribe((data: []) => {
+              data.forEach((dep: RawDeployment) => {
+                let subset = '';
+                if (dep.metadata.labels.version) {
+                  subset = dep.metadata.labels.version;
+                }
+
+                const cls = 'success-destination';
+                const element = new ElementRef(document.getElementById('app-destination-' + subset))
+                                    .nativeElement;
+                if (this.deploymentStatus(dep)) {
+                  this.renderer.addClass(element, cls);
+                } else {
+                  this.renderer.removeClass(element, cls);
+                }
+              });
+            });
+    this.refreshed = true;
+  }
+
+  deploymentStatus(dep: RawDeployment): boolean {
+    if (dep.metadata.generation <= dep.status.observedGeneration) {
+      if (dep.spec.replicas != null && dep.status.updatedReplicas < dep.spec.replicas) {
+        console.log('wait for deployment rollout to finish');
+        return false;
+      }
+
+      if (dep.status.replicas > dep.status.updatedReplicas) {
+        console.log(
+            'Waiting for deployment rollout to finish: old replicas are pending termination...');
+        return false;
+      }
+
+      if (!dep.status.availableReplicas ||
+          dep.status.availableReplicas < dep.status.updatedReplicas) {
+        console.log('Waiting for deployment rollout to finish: updated replicas are available...');
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 
   drawLines(): void {
@@ -219,5 +283,6 @@ export class IstioAppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.istioAppDetailSubscription_.unsubscribe();
+    this.pollingData.unsubscribe();
   }
 }

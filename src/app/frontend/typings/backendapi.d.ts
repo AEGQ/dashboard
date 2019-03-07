@@ -1246,3 +1246,26 @@ export interface CanaryDeploymentInput {
 export interface IstioItInput {
   version: string;
 }
+
+export interface RawDeployment {
+  metadata: RawDeploymentMetadata;
+  status: RawDeploymentStatus;
+  spec: RawDeploymentSpec;
+}
+
+export interface RawDeploymentMetadata {
+  generation: number;
+  labels?: StringMap;
+}
+
+export interface RawDeploymentSpec {
+  replicas: number;
+}
+
+export interface RawDeploymentStatus {
+  observedGeneration: number;
+  replicas: number;
+  updatedReplicas: number;
+  readyReplicas: number;
+  availableReplicas: number;
+}

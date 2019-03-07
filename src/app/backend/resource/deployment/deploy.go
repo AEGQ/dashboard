@@ -24,6 +24,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/errors"
 	apps "k8s.io/api/apps/v1beta2"
 	api "k8s.io/api/core/v1"
+	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -395,4 +396,36 @@ func reDeployCounter(val string) string {
 		return val
 	}
 	return fmt.Sprintf("%d", (now + int(1)))
+}
+
+// DeploymentStatus returns the deployment status
+func DeploymentStatus(deployment *v1beta1.Deployment) (string, bool, error) {
+	if deployment.Generation <= deployment.Status.ObservedGeneration {
+		cond := GetDeploymentCondition(deployment.Status, v1beta1.DeploymentProgressing)
+		if cond != nil && cond.Reason == "ProgressDeadlineExceeded" {
+			return "", false, fmt.Errorf("deployment %q exceeded its progress deadline", deployment.Name)
+		}
+		if deployment.Spec.Replicas != nil && deployment.Status.UpdatedReplicas < *deployment.Spec.Replicas {
+			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d out of %d new replicas have been updated...\n", deployment.Name, deployment.Status.UpdatedReplicas, *deployment.Spec.Replicas), false, nil
+		}
+		if deployment.Status.Replicas > deployment.Status.UpdatedReplicas {
+			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d old replicas are pending termination...\n", deployment.Name, deployment.Status.Replicas-deployment.Status.UpdatedReplicas), false, nil
+		}
+		if deployment.Status.AvailableReplicas < deployment.Status.UpdatedReplicas {
+			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d of %d updated replicas are available...\n", deployment.Name, deployment.Status.AvailableReplicas, deployment.Status.UpdatedReplicas), false, nil
+		}
+		return fmt.Sprintf("deployment %q successfully rolled out\n", deployment.Name), true, nil
+	}
+	return "Waiting for deployment spec update to be observed...\n", false, nil
+}
+
+// GetDeploymentCondition returns the condition with the provided type.
+func GetDeploymentCondition(status v1beta1.DeploymentStatus, condType v1beta1.DeploymentConditionType) *v1beta1.DeploymentCondition {
+	for i := range status.Conditions {
+		c := status.Conditions[i]
+		if c.Type == condType {
+			return &c
+		}
+	}
+	return nil
 }

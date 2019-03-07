@@ -25,6 +25,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/istio/api"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/deployment"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/destinationrule"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/virtualservice"
 	istioApi "github.com/wallstreetcn/istio-k8s/apis/networking.istio.io/v1alpha3"
@@ -340,7 +341,7 @@ func DeleteApp(client kubernetes.Interface, istioClient istio.Interface, namespa
 
 	// 1. delete deployments
 	replicaDeletion := metav1.DeletePropagationBackground
-	client.ExtensionsV1beta1().Deployments(namespace.ToRequestParam()).Delete(appName, &metav1.DeleteOptions{
+	_ = client.ExtensionsV1beta1().Deployments(namespace.ToRequestParam()).Delete(appName, &metav1.DeleteOptions{
 		GracePeriodSeconds: new(int64), PropagationPolicy: &replicaDeletion,
 	})
 
@@ -400,12 +401,17 @@ func removeFromVirtualService(istioClient istio.Interface, service *istioApi.Vir
 // 2. change virtual service to this version
 func TakeOverAllTraffic(client kubernetes.Interface, istioClient istio.Interface, namespace *common.NamespaceQuery,
 	appName string, version string, offlineType string) error {
-	_, err := getDeploymentByLabels(client, namespace, map[string]string{
+	dep, err := getDeploymentByLabels(client, namespace, map[string]string{
 		"app":     appName,
 		"version": version,
 	})
-	if err != nil {
+	if err != nil || len(dep) < 1 {
 		return err
+	}
+
+	reason, ready, _ := deployment.DeploymentStatus(&dep[0])
+	if !ready {
+		return fmt.Errorf("deployment %s is not ready for %s\n", dep[0].Name, reason)
 	}
 
 	var virtualServices []istioApi.VirtualService

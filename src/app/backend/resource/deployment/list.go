@@ -25,6 +25,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/event"
 	apps "k8s.io/api/apps/v1beta2"
 	v1 "k8s.io/api/core/v1"
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 )
 
@@ -60,19 +61,25 @@ type Deployment struct {
 	InitContainerImages []string `json:"initContainerImages"`
 }
 
-// GetDeploymentList returns a list of all Deployments in the cluster.
-func GetDeploymentList(client client.Interface, nsQuery *common.NamespaceQuery, dsQuery *dataselect.DataSelectQuery,
-	metricClient metricapi.MetricClient) (*DeploymentList, error) {
-	log.Print("Getting list of all deployments in the cluster")
-
+// GetDeploymentListWithOption returns a list of all Deployments in the cluster.
+func GetDeploymentListWithOption(client client.Interface, nsQuery *common.NamespaceQuery, dsQuery *dataselect.DataSelectQuery,
+	options metaV1.ListOptions, metricClient metricapi.MetricClient) (*DeploymentList, error) {
 	channels := &common.ResourceChannels{
-		DeploymentList: common.GetDeploymentListChannel(client, nsQuery, 1),
+		DeploymentList: common.GetDeploymentListChannelWithOptions(client, nsQuery, options, 1),
 		PodList:        common.GetPodListChannel(client, nsQuery, 1),
 		EventList:      common.GetEventListChannel(client, nsQuery, 1),
 		ReplicaSetList: common.GetReplicaSetListChannel(client, nsQuery, 1),
 	}
 
 	return GetDeploymentListFromChannels(channels, dsQuery, metricClient)
+}
+
+// GetDeploymentList returns a list of all Deployments in the cluster.
+func GetDeploymentList(client client.Interface, nsQuery *common.NamespaceQuery, dsQuery *dataselect.DataSelectQuery,
+	metricClient metricapi.MetricClient) (*DeploymentList, error) {
+	log.Print("Getting list of all deployments in the cluster")
+
+	return GetDeploymentListWithOption(client, nsQuery, dsQuery, api.ListEverything, metricClient)
 }
 
 // GetDeploymentList returns a list of all Deployments in the cluster

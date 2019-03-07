@@ -464,6 +464,35 @@ func GetDeploymentListChannel(client client.Interface,
 	return channel
 }
 
+// GetDeploymentListChannelWithOptions returns a pair of channels to a Deployment list and errors
+// that both must be read numReads times.
+func GetDeploymentListChannelWithOptions(client client.Interface,
+	nsQuery *NamespaceQuery, options metaV1.ListOptions, numReads int) DeploymentListChannel {
+
+	channel := DeploymentListChannel{
+		List:  make(chan *apps.DeploymentList, numReads),
+		Error: make(chan error, numReads),
+	}
+
+	go func() {
+		list, err := client.AppsV1beta2().Deployments(nsQuery.ToRequestParam()).
+			List(options)
+		var filteredItems []apps.Deployment
+		for _, item := range list.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		list.Items = filteredItems
+		for i := 0; i < numReads; i++ {
+			channel.List <- list
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
 // ReplicaSetListChannel is a list and error channels to Replica Sets.
 type ReplicaSetListChannel struct {
 	List  chan *apps.ReplicaSetList

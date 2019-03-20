@@ -52,7 +52,7 @@
 
 [[constraint]]
   name = "github.com/wallstreetcn/istio-k8s"
-  version = "v1.13.0"
+  version = "v1.13.0.1"
 
 [[override]]
   name = "github.com/square/go-jose"

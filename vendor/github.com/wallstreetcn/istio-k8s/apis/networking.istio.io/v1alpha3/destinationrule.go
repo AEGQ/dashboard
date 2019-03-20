@@ -81,7 +81,7 @@ type TrafficPolicy_PortTrafficPolicy struct {
 type TLSSettings struct {
 	// REQUIRED: Indicates whether connections to this port should be secured
 	// using TLS. The value of this field determines how TLS is enforced.
-	Mode int32 `protobuf:"varint,1,opt,name=mode,proto3,enum=istio.networking.v1alpha3.TLSSettings_TLSmode" json:"mode,omitempty"`
+	Mode string `protobuf:"varint,1,opt,name=mode,proto3,enum=istio.networking.v1alpha3.TLSSettings_TLSmode" json:"mode,omitempty"`
 	// REQUIRED if mode is `MUTUAL`. The path to the file holding the
 	// client-side TLS certificate to use.
 	// Should be empty if mode is `ISTIO_MUTUAL`.
